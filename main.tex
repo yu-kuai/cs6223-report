@@ -124,10 +124,8 @@ rewarded for producing broken tests that its validity check fails to catch.
 \textbf{Approach.} We study the most self-contained version of the setting: the model under test writes Python mutation
 programs, uses them to transform questions, answers the transformed questions, and receives feedback that steers
 which programs it writes, repairs or retires. We compare five configurations of this loop, from hand-written
-mutations only to a final configuration with an external judge, a hidden answer and non-editable code checks, and we
-measure every result with an independent grader. We follow the four research questions of our proposal
-(Section~\ref{sec:rqs}): how reliable the generated mutations are (RQ1), who can tell a real failure from a broken test
-(RQ2), whether feedback finds more distinct failures (RQ3), and what changes when the model tests itself (RQ4).
+mutations only to an external judge with a hidden answer and non-editable code checks, measure every result with an
+independent grader, and answer the four research questions of our proposal (Section~\ref{sec:rqs}).
 
 \textbf{Contributions.}
 (1) A closed-loop, black-box fuzzer in which the tested model writes sandboxed mutation programs for both text
@@ -165,8 +163,7 @@ judges.}
 \label{fig:loop}
 \end{figure*}
 
-Figure~\ref{fig:loop} shows the loop. This section describes its parts; Section~\ref{sec:impl} describes how they are
-built.
+Figure~\ref{fig:loop} shows the loop; Section~\ref{sec:impl} describes how it is built.
 
 \subsection{Tests and Metamorphic Relation}
 
@@ -303,10 +300,7 @@ Data come from MMLU~\cite{hendrycks2021mmlu} and ScienceQA~\cite{lu2022scienceqa
 \textbf{Challenges.} (1) \emph{Judge exploitation}: the first adaptive configuration produced many accepted failures that
 were tricks; we addressed this with the non-editable guard rather than a stricter prompt, because the judge is the very
 component being exploited. (2) \emph{Budget accounting}: model-written programs may call the LLM inside
-\texttt{mutate}, so these calls are counted, or a program could hide unlimited search inside one test. (3)
-\emph{Cluster engineering}: runs used one A100 (40 or 80\,GB) or H100 (96\,GB) GPU each on a Slurm cluster; the
-Python environment is packed into one archive and unpacked on each node, because the shared file system was too slow
-for many small files.
+\texttt{mutate}, so these calls are counted, or a program could hide unlimited search inside one test. Runs used one A100 or H100 GPU each on a Slurm cluster.
 
 \textbf{Not supported.} Only multiple-choice questions are supported, and there is no automatic check that a mutated
 image still contains the information needed to answer (Section~\ref{sec:limits}).
@@ -342,9 +336,6 @@ failures per 1{,}000 tests.
 questions~\cite{hendrycks2021mmlu} (20 per subject, 57 subjects). Images: Qwen3-VL 2B, 8B and 32B (Instruct) on all
 2{,}017 test questions of ScienceQA~\cite{lu2022scienceqa} that have an image. Thinking is disabled and the target
 answers greedily. Baseline accuracies are 0.577, 0.819 and 0.874 (text) and 0.858, 0.931 and 0.965 (images).
-
-\textbf{Baseline.} \HW{} (hand-written mutations, no learning) is the baseline for RQ3; the other four configurations
-of Table~\ref{tab:configs} isolate one design decision each.
 
 \textbf{Budget and repetitions.} A run stops after 5{,}000 counted calls: program synthesis and repair, LLM calls made
 inside \texttt{mutate}, and target answers. Judge calls are counted when the judge is the local model (\SJ{}) and not
@@ -426,15 +417,9 @@ Sample & Judge & Acc. & Fair & Trick & Broken \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_judges.pdf}
-\caption{Audit of the failures each judge accepted as real. Self-judging accepts broken tests; external judges accept
-tricks on text; the grader accepts broken images.}
-\label{fig:judges}
-\end{figure}
 
-Table~\ref{tab:judges} and Figure~\ref{fig:judges} show three distinct failure modes of LLM judges.
+
+Table~\ref{tab:judges} (chart: Figure~\ref{fig:judges} in the appendix) shows three distinct failure modes of LLM judges.
 
 \textbf{Self-judging is unreliable.} When the tested model judged its own tests, 37\% of accepted failures were broken.
 A model that fails a question is a poor authority on whether the question was changed. A larger model of the same family
@@ -478,16 +463,9 @@ Config & 1.7B & 8B & 32B & 1.7B & 8B & 32B & 1.7B & 8B & 32B \\
 \end{tabular}
 \end{table*}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.85\linewidth]{figures/fig_text_distinct.pdf}
-\caption{Text: distinct questions with a real failure (DeepSeek-graded; mean and std over 3 runs). The hatched part
-of \BOLD{} consists of tricks (double negations and fragmented questions); without them, \BOLD{} is back at the level
-of \HW{} on 8B and 32B. \BR{} produces no tricks.}
-\label{fig:text}
-\end{figure*}
 
-Table~\ref{tab:text} and Figure~\ref{fig:text} give the text results.
+
+Table~\ref{tab:text} gives the text results (charts: Figures~\ref{fig:text} and~\ref{fig:tradeoff} in the appendix).
 
 \textbf{\BOLD{} looks strong only because of tricks.} \BOLD{} finds 1.7--2.8$\times$ more distinct failing questions
 than \HW{} under DeepSeek grading. For 8B and 32B, almost all of the gain disappears under the strict count
@@ -501,18 +479,11 @@ vs.\ 26, 24 vs.\ 15). The run-to-run spread is large (8B: $\pm40$), so the advan
 decisive. On 8B, \BR{} has a high false-alarm rate (42\% real); one of the three runs produced 413 of its 597 answer
 changes.
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.9\linewidth]{figures/fig_tradeoff.pdf}
-\caption{Quantity versus quality on text (strict counts). Up and to the right is better. \BR{} (dark blue) is the
-only adaptive configuration that is never worse than \HW{} (grey) in quantity while staying competitive in precision on
-1.7B and 32B.}
-\label{fig:tradeoff}
-\end{figure}
+
 
 \textbf{\OJ{} is clean but timid.} Hiding the answer and using an external judge yields the highest precision on
 1.7B (80\%) but finds only 55 distinct questions: without pressure towards stronger mutations, the model writes cautious
-programs (Figure~\ref{fig:tradeoff}). This motivated the yield-based scoring of \BOLD{}.
+programs. This motivated the yield-based scoring of \BOLD{}.
 
 \begin{table}[t]
 \centering
@@ -557,15 +528,9 @@ original, right: mutated). Only (a) is a fair test.}
 \label{fig:images}
 \end{figure*}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_image_distinct.pdf}
-\caption{Images: distinct questions with a failure. For \BR{}, the hatched bar is the DeepSeek-graded count and the
-solid bar the count corrected by the sample audit (rough, 4--8 audited cases per model).}
-\label{fig:imgbars}
-\end{figure}
 
-\textbf{Images.} Table~\ref{tab:img} and Figure~\ref{fig:imgbars} give the image results. The hand-written image
+
+\textbf{Images.} Table~\ref{tab:img} gives the image results (chart: Figure~\ref{fig:imgbars} in the appendix). The hand-written image
 programs are mild and almost always valid (92--93\%) but find few failures, and fewer for stronger models. \BR{}
 learns substantially stronger image transformations (Figure~\ref{fig:images}). On VL-32B, most of its accepted
 failures are fair and it finds roughly twice as many distinct failing questions as \HW{} (about 37 vs.\ 16 after
@@ -582,13 +547,7 @@ discovery.}
 \label{fig:rounds}
 \end{figure*}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.9\linewidth]{figures/fig_rates_over_rounds.pdf}
-\caption{Real (solid) and broken (dashed) failures per 100 tests in blocks of 10 rounds, pooled over the runs still
-active in that block (late blocks of \BR{} therefore come from a single long run).}
-\label{fig:rates}
-\end{figure*}
+
 
 \textbf{Improvement over rounds.} A run ends when its 5{,}000 counted calls are used up, so the number of rounds
 differs between runs: 70--74 for \HW{} text runs and 104--108 for \HW{} image runs, but 35--143 for \BR{}, because
@@ -601,14 +560,7 @@ once the model has written stronger programs: the curves bend upwards after abou
 reach 80, 43 and 26 distinct questions against 14--17 for \HW{}; on Text 8B the longest run reaches 105 against
 46--53, but the two short runs (35 and 62 rounds) end at 30 and 42. Their programs called the LLM inside
 \texttt{mutate} so often that these calls used 3{,}853 and 2{,}921 of the 5{,}000 calls (889 in the long run), leaving
-few calls for testing.
-
-Figure~\ref{fig:rates} separates real from broken failures. On Image 2B and Image 32B, the real-failure rate of
-\BR{} rises over the run while the broken rate stays low: the loop learns. On Text 1.7B both rates stay roughly flat,
-with \BR{} above \HW{} in real failures and below it in broken ones; on Text 32B the broken rate peaks mid-run and then
-falls again as broken programs are repaired or retired. On Text 8B and Image 8B, the broken rate rises together with
-the real rate and eventually exceeds it, which matches the low precision in Tables~\ref{tab:text} and~\ref{tab:img}:
-the loop learns stronger mutations, but the judge does not stop it from overshooting.
+few calls for testing. Figure~\ref{fig:rates} in the appendix separates real from broken failures over the rounds.
 
 \subsubsection{RQ4: What does self-testing change?}
 
@@ -616,8 +568,8 @@ The model under test can be a productive \emph{generator}: in \BR{}, programs wr
 gains on Qwen3-8B/32B text and on VL-32B images. It is a poor \emph{judge}: with self-judging, the real share falls to
 15\% (8B) and 30\% (32B) on text and 9\% on VL-2B, where the model also mislabels its own option permutations. Closing
 the loop entirely therefore does not work; the loop needs an independent judge, and that judge itself needs
-non-LLM constraints, because an optimising generator will find the judge's blind spots. A useful analogy is reward
-hacking: the judge is a learned reward, and the fuzzer is an optimiser against it.
+non-LLM constraints, because an optimising generator will find the judge's blind spots. This resembles reward
+hacking: the fuzzer optimises against the judge.
 
 \subsection{Limitations and Threats to Validity}
 \label{sec:limits}
@@ -749,6 +701,60 @@ VL-32B & \HW{} & 4434\pmstd{11} & 21\pmstd{1} & 19\pmstd{2} & 92\% & 4.3 & 16\pm
 \end{table*}
 
 The full results are in Table~\ref{tab:full}.
+
+\section{Additional Figures}
+\label{app:figs}
+
+These figures show the data of the tables in Section~\ref{sec:results} as charts.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_judges.pdf}
+\caption{Audit of the failures each judge accepted as real. Self-judging accepts broken tests; external judges accept
+tricks on text; the grader accepts broken images.}
+\label{fig:judges}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/fig_text_distinct.pdf}
+\caption{Text: distinct questions with a real failure (DeepSeek-graded; mean and std over 3 runs). The hatched part
+of \BOLD{} consists of tricks (double negations and fragmented questions); without them, \BOLD{} is back at the level
+of \HW{} on 8B and 32B. \BR{} produces no tricks.}
+\label{fig:text}
+\end{figure*}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/fig_tradeoff.pdf}
+\caption{Quantity versus quality on text (strict counts). Up and to the right is better. \BR{} (dark blue) is the
+only adaptive configuration that is never worse than \HW{} (grey) in quantity while staying competitive in precision on
+1.7B and 32B.}
+\label{fig:tradeoff}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_image_distinct.pdf}
+\caption{Images: distinct questions with a failure. For \BR{}, the hatched bar is the DeepSeek-graded count and the
+solid bar the count corrected by the sample audit (rough, 4--8 audited cases per model).}
+\label{fig:imgbars}
+\end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/fig_rates_over_rounds.pdf}
+\caption{Real (solid) and broken (dashed) failures per 100 tests in blocks of 10 rounds, pooled over the runs still
+active in that block (late blocks of \BR{} therefore come from a single long run).}
+\label{fig:rates}
+\end{figure*}
+
+Figure~\ref{fig:rates} separates real from broken failures. On Image 2B and Image 32B, the real-failure rate of
+\BR{} rises over the run while the broken rate stays low: the loop learns. On Text 1.7B both rates stay roughly flat,
+with \BR{} above \HW{} in real failures and below it in broken ones; on Text 32B the broken rate peaks mid-run and then
+falls again as broken programs are repaired or retired. On Text 8B and Image 8B, the broken rate rises together with
+the real rate and eventually exceeds it, which matches the low precision in Tables~\ref{tab:text} and~\ref{tab:img}:
+the loop learns stronger mutations, but the judge does not stop it from overshooting.
 
 \section{Judge Prompt}
 \label{app:prompt}
