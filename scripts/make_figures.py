@@ -32,11 +32,11 @@ def save(fig, name):
 def fig_text():
     models = ["Qwen3-1.7B", "Qwen3-8B", "Qwen3-32B"]
     rows = [  # name, color, mean, std, strict mean
-        ("Hand-written", C["HW"], [99, 49, 33], [4, 4, 6], [98, 49, 33]),
-        ("Self-judged", C["SJ"], [109, 40, 26], [59, 20, 3], [108, 40, 26]),
-        ("Outside-judge", C["OJ"], [55, 60, 28], [13, 26, 7], [55, 60, 28]),
-        ("Bold", C["BO"], [170, 135, 80], [28, 129, 84], [169, 57, 31]),
-        ("Bold+Rules", C["BR"], [100, 59, 39], [20, 40, 15], [100, 59, 39]),
+        ("Static", C["HW"], [99, 49, 33], [4, 4, 6], [98, 49, 33]),
+        ("Self-Judge", C["SJ"], [109, 40, 26], [59, 20, 3], [108, 40, 26]),
+        ("External-Judge", C["OJ"], [55, 60, 28], [13, 26, 7], [55, 60, 28]),
+        ("Greedy", C["BO"], [170, 135, 80], [28, 129, 84], [169, 57, 31]),
+        ("Guarded", C["BR"], [100, 59, 39], [20, 40, 15], [100, 59, 39]),
     ]
     fig, ax = plt.subplots(figsize=(5.5, 2.5))
     x = np.arange(3); w = 0.16
@@ -46,7 +46,7 @@ def fig_text():
         extra = np.array(m) - np.array(st)
         if extra.max() > 2:
             ax.bar(xs, extra, w * 0.92, bottom=st, color="white", edgecolor=col, hatch="////", linewidth=0.8, zorder=2,
-                   label="Bold: tricks (double negation, fragmented question)")
+                   label="Greedy: tricks (double negation, fragmented question)")
         ax.errorbar(xs, m, yerr=s, fmt="none", ecolor="#333333", elinewidth=0.7, capsize=1.8, zorder=3)
     ax.set_xticks(x, models)
     ax.set_ylabel("distinct questions with\na real failure")
@@ -67,11 +67,11 @@ def fig_images():
     sj, sjs = [27, 46, 12], [9, 8, 11]
     br, brs = [39, 101, 50], [28, 37, 28]
     corr = [20, 13, 37]
-    ax.bar(x - w, hw, w * 0.92, color=C["HW"], label="Hand-written", zorder=2)
-    ax.bar(x, sj, w * 0.92, color=C["SJ"], label="Self-judged", zorder=2)
+    ax.bar(x - w, hw, w * 0.92, color=C["HW"], label="Static", zorder=2)
+    ax.bar(x, sj, w * 0.92, color=C["SJ"], label="Self-Judge", zorder=2)
     ax.bar(x + w, br, w * 0.92, color="white", edgecolor=C["BR"], hatch="////", linewidth=0.8, zorder=2,
-           label="Bold+Rules, as graded by DeepSeek")
-    ax.bar(x + w, corr, w * 0.92, color=C["BR"], zorder=3, label="Bold+Rules, corrected by hand audit")
+           label="Guarded, as graded by DeepSeek")
+    ax.bar(x + w, corr, w * 0.92, color=C["BR"], zorder=3, label="Guarded, corrected by hand audit")
     for xs, m, s in [(x - w, hw, hws), (x, sj, sjs), (x + w, br, brs)]:
         ax.errorbar(xs, m, yerr=s, fmt="none", ecolor="#333333", elinewidth=0.7, capsize=1.8, zorder=4)
     for i in range(3):
@@ -113,7 +113,7 @@ def load_run(d):
 PANELS = [("results/fuzz", "qwen3-1.7b_self", "Text 1.7B"), ("results/fuzz", "qwen3-8b_self", "Text 8B"),
           ("results/fuzz", "qwen3-32b_self", "Text 32B"), ("results/fuzz_vqa", "qwen3-vl-2b_self", "Image 2B"),
           ("results/fuzz_vqa", "qwen3-vl-8b_self", "Image 8B"), ("results/fuzz_vqa", "qwen3-vl-32b_self", "Image 32B")]
-SETUPS = [("Hand-written", "fixed*", C["HW"]), ("Bold+Rules", "full_v4*", C["BR"])]
+SETUPS = [("Static", "fixed*", C["HW"]), ("Guarded", "full_v4*", C["BR"])]
 
 
 def runs(base, m, pat):
@@ -182,13 +182,13 @@ def fig_rates(win=10):
 # ------------------------------------------------------------------ 4. judges
 def fig_judges():
     rows = [  # label, fair, trick, broken (counts of failures the judge accepted)
-        ("Tested model judges itself\n(Self-judged era, n=102)", 58, 6, 38),
-        ("Qwen3-32B judges\n(Self-judged era, n=78)", 52, 9, 17),
-        ("DeepSeek grader\n(Self-judged era, n=25)", 23, 2, 0),
-        ("GLM in-loop judge\n(Bold, n=54)", 22, 32, 0),
-        ("DeepSeek grader\n(Bold, n=45)", 15, 30, 0),
-        ("DeepSeek grader, images\n(Hand-written, n=20)", 20, 0, 0),
-        ("DeepSeek grader, images\n(Bold+Rules, n=20)", 9, 3, 8),
+        ("Tested model judges itself\n(Self-Judge era, n=102)", 58, 6, 38),
+        ("Qwen3-32B judges\n(Self-Judge era, n=78)", 52, 9, 17),
+        ("DeepSeek grader\n(Self-Judge era, n=25)", 23, 2, 0),
+        ("GLM in-loop judge\n(Greedy, n=54)", 22, 32, 0),
+        ("DeepSeek grader\n(Greedy, n=45)", 15, 30, 0),
+        ("DeepSeek grader, images\n(Static, n=20)", 20, 0, 0),
+        ("DeepSeek grader, images\n(Guarded, n=20)", 9, 3, 8),
     ]
     fig, ax = plt.subplots(figsize=(5.5, 2.9))
     y = np.arange(len(rows))[::-1]
@@ -216,13 +216,13 @@ def fig_judges():
 # ------------------------------------------------------------------ 5. quantity vs quality (text)
 def fig_tradeoff():
     pts = {  # config: [(real share %, distinct questions strict) for 1.7B, 8B, 32B]
-        "Hand-written": [(76, 98), (80, 49), (79, 33)],
-        "Self-judged": [(56, 108), (15, 40), (30, 26)],
-        "Outside-judge": [(80, 55), (48, 60), (44, 28)],
-        "Bold": [(80, 169), (25, 57), (28, 31)],
-        "Bold+Rules": [(89, 100), (42, 59), (62, 39)],
+        "Static": [(76, 98), (80, 49), (79, 33)],
+        "Self-Judge": [(56, 108), (15, 40), (30, 26)],
+        "External-Judge": [(80, 55), (48, 60), (44, 28)],
+        "Greedy": [(80, 169), (25, 57), (28, 31)],
+        "Guarded": [(89, 100), (42, 59), (62, 39)],
     }
-    col = {"Hand-written": C["HW"], "Self-judged": C["SJ"], "Outside-judge": C["OJ"], "Bold": C["BO"], "Bold+Rules": C["BR"]}
+    col = {"Static": C["HW"], "Self-Judge": C["SJ"], "External-Judge": C["OJ"], "Greedy": C["BO"], "Guarded": C["BR"]}
     mk = ["o", "s", "^"]
     fig, ax = plt.subplots(figsize=(4.4, 2.7))
     for n, ps in pts.items():

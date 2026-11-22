@@ -38,11 +38,11 @@
 \pagestyle{plain}
 
 % names of the compared setups
-\newcommand{\HW}{\textsc{Hand-written}}
-\newcommand{\SJ}{\textsc{Self-judged}}
-\newcommand{\OJ}{\textsc{Outside-judge}}
-\newcommand{\BOLD}{\textsc{Bold}}
-\newcommand{\BR}{\textsc{Bold+Rules}}
+\newcommand{\HW}{\textsc{Static}}
+\newcommand{\SJ}{\textsc{Self-Judge}}
+\newcommand{\OJ}{\textsc{External-Judge}}
+\newcommand{\BOLD}{\textsc{Greedy}}
+\newcommand{\BR}{\textsc{Guarded}}
 \newcommand{\pmstd}[1]{{\scriptsize$\pm$#1}}
 
 % colours used in the plots
@@ -236,13 +236,13 @@ s_p=\underbrace{\frac{V_p+\tfrac12 N_p+\tfrac12}{n_p+2}}_{\text{yield}}
    -\underbrace{\frac{F_p}{2(P_p+1)}}_{\text{false alarms}}
    +\underbrace{0.1\sqrt{\frac{\ln(T+1)}{n_p+1}}}_{\text{exploration}}
 \]
-(the \BOLD{} variants; \SJ{} and \OJ{} weight novelty more, $(V_p+2N_p+1)/(n_p+2)$, with a bonus of $0.3$). Failure
+(\BOLD{} and \BR{}; \SJ{} and \OJ{} weight novelty more, $(V_p+2N_p+1)/(n_p+2)$, with a bonus of $0.3$). Failure
 clusters are formed online by leader clustering of the judge's pattern descriptions with MiniLM embeddings and a cosine
 threshold of 0.8. Seeds are sampled uniformly over MMLU subjects.
 
 \paragraph{New programs.} Every second round the model writes two new programs. Its prompt contains the API, an example
 program from the least-explored family, the list of known failure clusters and one recent VALID failure. In \BOLD{}
-variants, one of the two prompts instead asks for a \emph{stronger variant} of the current best program (the
+and \BR{}, one of the two prompts instead asks for a \emph{stronger variant} of the current best program (the
 ``champion''), showing its yield, the average yield and two of its real failures. A new program must run and pass its
 own check on at least one of three random seeds to enter the pool.
 
@@ -251,7 +251,7 @@ the judge's reasons and, from \OJ{} on, two of the program's real failures to ke
 one only if, on fresh runs, it no longer breaks at least two thirds of the previously broken seeds, never crashes,
 rejects at most half of its own outputs and still produces tests on the seeds where it found real failures.
 
-\paragraph{Retirement and lineage cap.} \BOLD{} variants keep at most 12 active programs and retire a program after 40
+\paragraph{Retirement and lineage cap.} \BOLD{} and \BR{} keep at most 12 active programs and retire a program after 40
 tries without a VALID failure (keeping at least three active). \BR{} additionally caps each \emph{lineage} (a program
 and its stronger variants) at 25\% of the sampling weight, so one family cannot take over the run.
 
@@ -266,12 +266,12 @@ and its stronger variants) at 25\% of the sampling weight, so one family cannot 
 \toprule
 Name & Description \\
 \midrule
-\HW{} & Only the hand-written seed programs, sampled uniformly; no synthesis, repair or judge feedback (baseline). \\
-\SJ{} & Model-written programs with score-based feedback; the model judges its own tests; programs see the gold label;
+\HW{} & No learning: only the hand-written seed programs, sampled uniformly; no new programs, repairs or feedback (baseline). \\
+\SJ{} & The model writes and evolves programs with score-based feedback, and judges its own tests; programs see the gold label;
         untested repairs. Variant \emph{+ letter check} adds the deterministic gold-text guard. \\
-\OJ{} & As \SJ{}, but the answer is hidden from programs, GLM judges, fixed checks are on and repairs are tested. \\
-\BOLD{} & \OJ{} plus yield-based scoring, stronger-variant prompts, retirement and at most 12 programs. \\
-\BR{} & \BOLD{} plus the three anti-exploit rules and the 25\% lineage cap. \textbf{Final configuration.} \\
+\OJ{} & As \SJ{}, but an external LLM (GLM) judges, the answer is hidden from programs, fixed checks are on and repairs are tested. \\
+\BOLD{} & \OJ{} plus pressure to find more failures: yield-based scoring, prompts for stronger variants of the best program, retirement of unproductive programs, at most 12 programs. \\
+\BR{} & \BOLD{} plus guardrails against judge gaming: three non-editable rules (no added negation, no fragmented question, no inflated options) and a 25\% cap per program lineage. \textbf{Final configuration.} \\
 \bottomrule
 \end{tabularx}
 \end{table}
