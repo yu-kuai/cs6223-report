@@ -1,41 +1,47 @@
-\documentclass[10pt]{article}
+% PLEASE DO NOT MODIFY THE DOCUMENT CLASS
+\documentclass[sigconf]{acmart}
+\settopmatter{printacmref=false} % Removes citation information below abstract
+\renewcommand\footnotetextcopyrightpermission[1]{} % Removes conference footnote
+\pagestyle{plain} % Removes running headers
 
-% ---------------------------------------------------------------- layout (NeurIPS-like, self-contained)
-\usepackage[letterpaper,textwidth=5.5in,textheight=9in,top=1in,headheight=12pt,headsep=25pt,footskip=30pt]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage{times}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb}
-\usepackage{booktabs}
-\usepackage{tabularx}
-\usepackage{multirow}
-\usepackage{adjustbox}
+% Course requirement: the completed final report should be 6--8 pages.
+% Submit the project artifact as well as the final report.
+
+% packages
+\let\Bbbk\relax
+\usepackage{amsmath,amssymb,amsfonts}
 \usepackage{graphicx}
-\usepackage{subcaption}
-\usepackage{xcolor}
-\usepackage{enumitem}
+\usepackage{textcomp}
+\usepackage{color}
+\usepackage{hyperref}
+% \usepackage{hyperxmp}
+\usepackage{adjustbox}
+\usepackage{makecell}
 \usepackage{microtype}
-\usepackage[square]{natbib}
-\usepackage[hidelinks]{hyperref}
+\usepackage{multirow}
+\usepackage{threeparttable}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{bbding}
+\usepackage{colortbl}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage{pifont}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{url}
+\usepackage{fontawesome}
+\usepackage{listings}
+\usepackage[ruled,linesnumbered,vlined]{algorithm2e}
+\usepackage[noend]{algpseudocode}
+\usepackage[most]{tcolorbox}
+\usepackage{float}
+\usepackage{balance}
+% added for this report
+\usepackage{tabularx}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,fit}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.17}
-\captionsetup{font=small,labelfont=rm,skip=4pt}
-
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{5.5pt}
-\setlist{itemsep=1pt,topsep=2pt,parsep=1pt}
+\usetikzlibrary{arrows.meta,positioning}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
-
-% section headings as in the NeurIPS style
-\makeatletter
-\renewcommand{\section}{\@startsection{section}{1}{\z@}{-2.0ex \@plus -0.5ex \@minus -0.2ex}{1.5ex \@plus 0.3ex \@minus 0.2ex}{\large\bfseries\raggedright}}
-\renewcommand{\subsection}{\@startsection{subsection}{2}{\z@}{-1.8ex \@plus -0.5ex \@minus -0.2ex}{0.8ex \@plus 0.2ex}{\normalsize\bfseries\raggedright}}
-\renewcommand{\paragraph}{\@startsection{paragraph}{4}{\z@}{1.5ex \@plus 0.5ex \@minus 0.2ex}{-1em}{\normalsize\bfseries}}
-\renewcommand{\@seccntformat}[1]{\csname the#1\endcsname\hspace{0.8em}}
-\makeatother
-\pagestyle{plain}
 
 % names of the compared setups
 \newcommand{\HW}{\textsc{Static}}
@@ -45,124 +51,107 @@
 \newcommand{\BR}{\textsc{Guarded}}
 \newcommand{\pmstd}[1]{{\scriptsize$\pm$#1}}
 
-% colours used in the plots
-\definecolor{cHW}{HTML}{8C96A6}
-\definecolor{cSJ}{HTML}{D9A441}
-\definecolor{cOJ}{HTML}{6BAED6}
-\definecolor{cBO}{HTML}{E6855E}
-\definecolor{cBR}{HTML}{2F5DA8}
-
 \begin{document}
 
-% ---------------------------------------------------------------- title block
-\begin{center}
-\rule{\textwidth}{4pt}\\[0.25in]
-{\LARGE\bfseries Can an LLM Test Itself? Reliable Self-Evolving\\[3pt] Metamorphic Fuzzing for Text and Image\\[3pt] Question Answering\par}
-\vspace{0.2in}
-\rule{\textwidth}{1pt}\\[0.3in]
-\begin{tabular}{c@{\hspace{0.6in}}c}
-\textbf{Shiu-Hong Kao} & \textbf{Kuai Yu}\\
-National University of Singapore & National University of Singapore\\
-\texttt{shkao@u.nus.edu} & \texttt{kuai.yu@u.nus.edu}
-\end{tabular}\\[10pt]
-\begin{tabular}{c}
-\textbf{Xinyao Liao}\\
-National University of Singapore\\
-\texttt{liaoxinyao@u.nus.edu}
-\end{tabular}
-\end{center}
-\vspace{0.15in}
+\title{Can an LLM Test Itself? Reliable Self-Evolving Metamorphic Fuzzing for Text and Image Question Answering}
 
-\begin{center}{\large\bfseries Abstract}\end{center}
-\vspace{-4pt}
-\begin{quote}
+% TODO: fill in each student ID and NUS e-mail address.
+\author{Shiu-Hong Kao}
+\affiliation{
+  \institution{National University of Singapore}
+  \department{Student ID: TODO}
+  \city{Singapore}
+  \country{Singapore}
+}
+\email{TODO@u.nus.edu}
+
+\author{Kuai Yu}
+\affiliation{
+  \institution{National University of Singapore}
+  \department{Student ID: TODO}
+  \city{Singapore}
+  \country{Singapore}
+}
+\email{TODO@u.nus.edu}
+
+\author{Xinyao Liao}
+\affiliation{
+  \institution{National University of Singapore}
+  \department{Student ID: TODO}
+  \city{Singapore}
+  \country{Singapore}
+}
+\email{TODO@u.nus.edu}
+
+\begin{abstract}
+\noindent
 Large language models (LLMs) can change their answer when a question is rephrased, its options are reordered or its
 image is slightly perturbed. Metamorphic testing exposes such inconsistencies without a new oracle, and LLMs are
 increasingly used to \emph{generate} the follow-up tests. We study a fully closed loop in which the model under test
 also writes, scores and repairs the mutation programs that test it, and ask how reliable such self-testing is. We
 evaluate Qwen3 1.7B, 8B and 32B on 1{,}140 MMLU questions and Qwen3-VL 2B, 8B and 32B on 2{,}017 ScienceQA image
 questions, with a fixed budget of 5{,}000 model calls per run and three runs per setting. Every reported failure is
-re-graded by an independent LLM (DeepSeek), and samples are audited by an AI assistant acting as a human annotator. We find that (i) the bottleneck is test
-validity, not failure discovery: when the model judges its own tests, 37\% of the failures it accepts are broken
-tests; (ii) hiding the gold answer from the mutation programs is essential, raising the share of real failures from
-19\% to 80\%; (iii) an evolving fuzzer quickly learns to exploit its judge, inflating failure counts up to 2.8$\times$ with
-double negations and fragmented questions that two different LLM judges accept; and (iv) cheap, non-editable code
-checks remove these exploits. Our final configuration finds 1--20\% more distinct failing questions than hand-written
-mutations on text and about twice as many on the strongest vision model, but over-perturbs images for smaller models,
-where the LLM grader is too lenient to notice.
-\end{quote}
+re-graded by an independent LLM (DeepSeek), and samples are audited by an AI assistant acting as a human annotator.
+We find that (i) the bottleneck is test validity, not failure discovery: when the model judges its own tests, 37\% of
+the failures it accepts are broken tests; (ii) hiding the gold answer from the mutation programs is essential, raising
+the share of real failures from 19\% to 80\%; (iii) an evolving fuzzer quickly learns to exploit its judge, inflating
+failure counts up to 2.8$\times$ with double negations and fragmented questions that two different LLM judges accept;
+and (iv) cheap, non-editable code checks remove these exploits. Our final configuration finds 1--20\% more distinct
+failing questions than hand-written mutations on text and about twice as many on the strongest vision model, but
+over-perturbs images for smaller models, where the LLM grader is too lenient to notice.
+\end{abstract}
+
+\maketitle
 
 % ================================================================ 1
 \section{Introduction}
 
 A question-answering model should give the same answer when only the surface of a question changes: the options are
-shuffled, a sentence is reworded, or an image is slightly blurred. Metamorphic testing (MT)~\citep{chen1998metamorphic}
+shuffled, a sentence is reworded, or an image is slightly blurred. Metamorphic testing (MT)~\cite{chen1998metamorphic}
 checks exactly this kind of property. Instead of an oracle for each new input, it relies on a \emph{metamorphic
 relation} between a source input and a follow-up input, for example ``after permuting the options, the predicted
 option must move with the correct text''. MT has been applied widely to NLP models and
-LLMs~\citep{ribeiro2020checklist,manino2022systematicity,hyun2023metal,rajan2024kontest,cho2025mt}, and LLMs are now
-also used as fuzzers that generate the follow-up inputs themselves~\citep{xia2024fuzz4all,liu2026hallutrigger}.
+LLMs~\cite{ribeiro2020checklist,manino2022systematicity,hyun2023metal,rajan2024kontest,cho2025mt}, and LLMs are now
+also used as fuzzers that generate the follow-up inputs themselves~\cite{xia2024fuzz4all,liu2026hallutrigger}.
 
-The difficulty is that natural-language and image transformations are not exact. A paraphrase can quietly change what is
+\textbf{Problem.} Natural-language and image transformations are not exact. A paraphrase can quietly change what is
 asked, and a strong blur can remove the information needed to answer. A disagreement between the source and follow-up
 answers is therefore only a \emph{candidate} failure: it may be a real model error, or a broken test.
 \citet{cho2025mt} identify such input-transformation errors as a main source of false positives in large-scale MT of
 LLMs. The problem becomes sharper when the generator \emph{adapts}: a fuzzer rewarded for finding failures is also
 rewarded for producing broken tests that its validity check fails to catch.
 
-This report studies the most self-contained version of the setting: the model under test writes Python mutation
-programs, uses them to transform questions, answers both versions, and receives feedback that steers which programs it
-writes, repairs or retires. We follow the four research questions of our proposal:
-\begin{itemize}
-  \item \textbf{RQ1 (Mutation reliability).} How often do LLM-generated mutations preserve the answer, and what breaks them?
-  \item \textbf{RQ2 (Detection reliability).} How accurately can the model itself, or an external LLM, decide whether
-        a detected inconsistency is a real failure?
-  \item \textbf{RQ3 (Feedback).} Under a fixed call budget, does validity-and-diversity feedback find more distinct
-        valid failures than hand-written mutations?
-  \item \textbf{RQ4 (Self-testing).} What changes when the tested model also writes and judges its own tests?
-\end{itemize}
+\textbf{Approach.} We study the most self-contained version of the setting: the model under test writes Python mutation
+programs, uses them to transform questions, answers the transformed questions, and receives feedback that steers
+which programs it writes, repairs or retires. We compare five configurations of this loop, from hand-written
+mutations only to a final configuration with an external judge, a hidden answer and non-editable code checks, and we
+measure every result with an independent grader. We follow the four research questions of our proposal
+(Section~\ref{sec:rqs}): how reliable the generated mutations are (RQ1), who can tell a real failure from a broken test
+(RQ2), whether feedback finds more distinct failures (RQ3), and what changes when the model tests itself (RQ4).
 
-Our contributions are:
-(1) a closed-loop, black-box fuzzer in which the tested model writes sandboxed mutation programs for both text
-multiple-choice questions and image questions, with bandit-based scheduling, tested repairs and retirement;
-(2) a controlled comparison of five configurations on six models under equal budgets, with independent re-grading and
-sample audits;
-(3) evidence that an adaptive fuzzer \emph{games} LLM judges with answer-preserving but unnatural rewrites, and that
-simple non-editable code rules suppress this; and
-(4) evidence that LLM graders are overly lenient on degraded images, so image MT results require visual audits.
+\textbf{Contributions.}
+(1) A closed-loop, black-box fuzzer in which the tested model writes sandboxed mutation programs for both text
+multiple-choice questions and image questions, with bandit-based scheduling, tested repairs and retirement.
+(2) A controlled comparison of five configurations on six models under equal budgets, with independent re-grading and
+sample audits.
+(3) Evidence that an adaptive fuzzer \emph{games} LLM judges with answer-preserving but unnatural rewrites, and that
+simple non-editable code rules suppress this.
+(4) Evidence that LLM graders are overly lenient on degraded images, so image MT results require visual audits.
 
 % ================================================================ 2
-\section{Background and Related Work}
+\section{Approach}
 
-\paragraph{Metamorphic testing of NLP models and LLMs.} CheckList~\citep{ribeiro2020checklist} introduced
-capability-oriented behavioural tests, including invariance tests that are metamorphic relations. Later work extended MT
-to systematicity and transitivity~\citep{manino2022systematicity}, built general frameworks for LLM
-qualities~\citep{hyun2023metal}, generated knowledge-based consistency queries~\citep{rajan2024kontest}, and grounded
-relations in formal logic to avoid semantic drift~\citep{zhou2026lgmt}. The large study of \citet{cho2025mt}
-catalogues 191 relations and highlights false positives caused by the transformations themselves, which is the issue we
-measure directly.
-
-\paragraph{LLMs as fuzzers and as judges.} Fuzz4All~\citep{xia2024fuzz4all} uses an LLM to generate and evolve test
-inputs from feedback, and HalluTrigger~\citep{liu2026hallutrigger} prioritises metamorphic pairs using hidden states of
-open-source targets. LLM-as-a-judge~\citep{zheng2023judge} is a common way to score generated outputs, but it is known
-to be biased and exploitable. Our setting combines both roles with the target itself, in a fully black-box loop, and we
-measure how reliable each role is.
-
-% ================================================================ 3
-\section{Method}
-
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\begin{adjustbox}{max width=\linewidth}
 \begin{tikzpicture}[
   box/.style={draw, rounded corners=3pt, align=center, font=\small, minimum height=0.95cm, inner sep=4pt, fill=#1},
   box/.default=white, arr/.style={-{Latex[length=2mm]}, thick}, lab/.style={font=\scriptsize, align=center}]
 \node[box=blue!6]  (pool) {Program pool\\\scriptsize(seed + model-written)};
-\node[box, right=0.55cm of pool] (mut) {\texttt{mutate}$(x)\to x'$\\\scriptsize sandbox, answer hidden};
-\node[box, right=0.55cm of mut]  (chk) {Code checks\\\scriptsize\texttt{check} + fixed rules};
-\node[box, right=0.55cm of chk]  (tgt) {Target answers\\\scriptsize $f(x')$ vs.\ $\pi(y)$};
-\node[box=orange!10, below=0.75cm of tgt] (judge) {Judge (LLM)\\\scriptsize VALID / INVALID};
-\node[box=green!8, below=0.75cm of mut, minimum width=4.4cm] (fb) {Feedback: bandit score, new programs,\\\scriptsize tested repairs, retirement, lineage cap};
+\node[box, right=0.9cm of pool] (mut) {\texttt{mutate}$(x)\to x'$\\\scriptsize sandbox, answer hidden};
+\node[box, right=0.9cm of mut]  (chk) {Code checks\\\scriptsize\texttt{check} + fixed rules};
+\node[box, right=0.9cm of chk]  (tgt) {Target answers\\\scriptsize $f(x')$ vs.\ $\pi(y)$};
+\node[box=orange!10, below=0.7cm of tgt] (judge) {Judge (LLM)\\\scriptsize VALID / INVALID};
+\node[box=green!8, below=0.7cm of mut, minimum width=5cm] (fb) {Feedback: bandit score, new programs,\\\scriptsize tested repairs, retirement, lineage cap};
 \draw[arr] (pool) -- (mut);
 \draw[arr] (mut) -- (chk);
 \draw[arr] (chk) -- node[lab, above]{pass} (tgt);
@@ -170,13 +159,16 @@ measure how reliable each role is.
 \draw[arr] (judge) -- (fb);
 \draw[arr] (fb.west) -| node[lab, pos=0.25, below]{steer} (pool.south);
 \end{tikzpicture}
-\end{adjustbox}
-\caption{The closed loop. The model under test writes the mutation programs, answers the questions and (in
-\SJ{}) judges them; an external LLM judges in the other configurations.}
+\caption{The closed loop. One round runs 48 tests, then applies feedback. The model under test writes the mutation
+programs and answers the questions; in \SJ{} it also judges them, and in the other configurations an external LLM
+judges.}
 \label{fig:loop}
-\end{figure}
+\end{figure*}
 
-\subsection{Tests and metamorphic relation}
+Figure~\ref{fig:loop} shows the loop. This section describes its parts; Section~\ref{sec:impl} describes how they are
+built.
+
+\subsection{Tests and Metamorphic Relation}
 
 A source test is $x=(q,C,y)$ with question $q$, options $C=(c_A,\dots)$ and gold label $y$; image questions also carry
 an image $v$ and an optional text hint. A mutation produces $x'=(q',C',v')$ together with a label map $\pi$, a
@@ -184,32 +176,30 @@ bijection on option letters that records any reordering. The relation is
 \[
   f(x)=y \;\Longrightarrow\; f(x')=\pi(y),
 \]
-where $f$ is the model under test. We only use source tests that the model answers \emph{stably} correctly: the greedy
-answer and five samples at temperature 0.7 must all equal $y$. This leaves 657, 860 and 932 of the 1{,}140 MMLU
-seeds for Qwen3 1.7B, 8B and 32B, and 1{,}517, 1{,}776 and 1{,}875 of the 2{,}017 ScienceQA seeds for Qwen3-VL 2B, 8B
-and 32B. Any change of answer after mutation is then attributable to the mutation, not to sampling noise. As an
-additional, deterministic guard, if the gold option's text appears exactly once among the mutated options, its new
-position defines the expected letter, overriding a wrong label map.
+where $f$ is the model under test. A \emph{failure} is a test with $f(x')\neq\pi(y)$. We only use source tests that
+the model answers \emph{stably} correctly: the greedy answer and five samples at temperature 0.7 must all equal $y$.
+This leaves 657, 860 and 932 of the 1{,}140 MMLU seeds for Qwen3 1.7B, 8B and 32B, and 1{,}517, 1{,}776 and 1{,}875 of
+the 2{,}017 ScienceQA seeds for Qwen3-VL 2B, 8B and 32B. Any change of answer after mutation is then attributable to
+the mutation, not to sampling noise. As an additional, deterministic guard, if the gold option's text appears exactly
+once among the mutated options, its new position defines the expected letter, overriding a wrong label map.
 
-\subsection{Mutation programs}
+\subsection{Mutation Programs}
 
 A mutation is a small Python module with a \texttt{FAMILY} name, a one-sentence \texttt{MECHANISM}, a function
 \texttt{mutate(seed, llm, rng)} and a self-check \texttt{check(seed, mutated)}. Programs may call the fuzzer LLM
-(\texttt{llm}, and \texttt{vlm} with an image) and a sentence-similarity helper~\citep{reimers2019sbert}. They run in a
-separate process with an import allow-list (standard text modules, plus PIL and NumPy for images), restricted builtins,
-2\,GB memory, 30\,s CPU, no file writes and a wall-clock timeout. The loop starts from 7 hand-written text programs
-(option permutation, question paraphrase, option paraphrase, verbosity change, irrelevant context, synonym substitution,
-typo noise) and 9 image programs (blur, noise, JPEG compression, brightness/contrast, grayscale, rescaling, margin
-distractors, option permutation, question paraphrase).
+(\texttt{llm}, and \texttt{vlm} with an image) and a sentence-similarity helper~\cite{reimers2019sbert}. The loop
+starts from 7 hand-written text programs (option permutation, question paraphrase, option paraphrase, verbosity
+change, irrelevant context, synonym substitution, typo noise) and 9 image programs (blur, noise, JPEG compression,
+brightness/contrast, grayscale, rescaling, margin distractors, option permutation, question paraphrase).
 
-\paragraph{Hidden answer.} In all configurations from \OJ{} onwards, the seed passed to the sandbox does not contain the
+\textbf{Hidden answer.} In all configurations from \OJ{} onwards, the seed passed to a program does not contain the
 gold label. A program must therefore preserve the answer for \emph{whichever} option is correct; it cannot target the
 correct option, for example by weakening its text.
 
-\subsection{Validity checks and judges}
+\subsection{Validity Checks and Judges}
 
 A mutated test passes three filters before the target is queried for it, and one after:
-\begin{enumerate}
+\begin{enumerate}[leftmargin=*]
   \item the program's own \texttt{check} (editable by the fuzzer);
   \item \emph{fixed checks} that the fuzzer cannot edit: options are distinct and non-empty; no number in the question,
         options or hint disappears; no negation word is lost and no framing word (\emph{except}, \emph{false},
@@ -228,8 +218,8 @@ API, which was verified to use the image (40/40 correct with the image versus 31
 
 \subsection{Feedback}
 
-\paragraph{Scheduling.} Each round runs 48 tests. A program is chosen with probability proportional to a score that
-combines real-failure yield, novelty, a false-alarm penalty and a UCB-style exploration bonus~\citep{auer2002ucb}. For
+\textbf{Scheduling.} Each round runs 48 tests. A program is chosen with probability proportional to a score that
+combines real-failure yield, novelty, a false-alarm penalty and a UCB-style exploration bonus~\cite{auer2002ucb}. For
 program $p$ with $n_p$ tries, $P_p$ tests that reached the target, $V_p$ VALID and $F_p$ INVALID failures, $N_p$ of
 which opened a new failure cluster, and $T$ total tries,
 \[
@@ -241,18 +231,18 @@ s_p=\underbrace{\frac{V_p+\tfrac12 N_p+\tfrac12}{n_p+2}}_{\text{yield}}
 clusters are formed online by leader clustering of the judge's pattern descriptions with MiniLM embeddings and a cosine
 threshold of 0.8. Seeds are sampled uniformly over MMLU subjects.
 
-\paragraph{New programs.} Every second round the model writes two new programs. Its prompt contains the API, an example
+\textbf{New programs.} Every second round the model writes two new programs. Its prompt contains the API, an example
 program from the least-explored family, the list of known failure clusters and one recent VALID failure. In \BOLD{}
 and \BR{}, one of the two prompts instead asks for a \emph{stronger variant} of the current best program (the
 ``champion''), showing its yield, the average yield and two of its real failures. A new program must run and pass its
 own check on at least one of three random seeds to enter the pool.
 
-\paragraph{Tested repairs.} Up to four programs per round that produced INVALID failures receive a repair prompt with
+\textbf{Tested repairs.} Up to four programs per round that produced INVALID failures receive a repair prompt with
 the judge's reasons and, from \OJ{} on, two of the program's real failures to keep. The repaired version replaces the old
 one only if, on fresh runs, it no longer breaks at least two thirds of the previously broken seeds, never crashes,
 rejects at most half of its own outputs and still produces tests on the seeds where it found real failures.
 
-\paragraph{Retirement and lineage cap.} \BOLD{} and \BR{} keep at most 12 active programs and retire a program after 40
+\textbf{Retirement and lineage cap.} \BOLD{} and \BR{} keep at most 12 active programs and retire a program after 40
 tries without a VALID failure (keeping at least three active). \BR{} additionally caps each \emph{lineage} (a program
 and its stronger variants) at 25\% of the sampling weight, so one family cannot take over the run.
 
@@ -263,7 +253,7 @@ and its stronger variants) at 25\% of the sampling weight, so one family cannot 
 \caption{Compared configurations. All use the same model as fuzzer and target and 5{,}000 counted calls per run.}
 \label{tab:configs}
 \small
-\begin{tabularx}{\linewidth}{lY}
+\begin{tabularx}{\linewidth}{@{}lY@{}}
 \toprule
 Name & Description \\
 \midrule
@@ -271,113 +261,174 @@ Name & Description \\
 \SJ{} & The model writes and evolves programs with score-based feedback, and judges its own tests; programs see the gold label;
         untested repairs. Variant \emph{+ letter check} adds the deterministic gold-text guard. \\
 \OJ{} & As \SJ{}, but an external LLM (GLM) judges, the answer is hidden from programs, fixed checks are on and repairs are tested. \\
-\BOLD{} & \OJ{} plus pressure to find more failures: yield-based scoring, prompts for stronger variants of the best program, retirement of unproductive programs, at most 12 programs. \\
-\BR{} & \BOLD{} plus the minimal guard: the fixed check also rejects added negations, split-up questions and much longer options, and no program lineage gets more than 25\% of the tests. \textbf{Final configuration.} \\
+\BOLD{} & \OJ{} plus pressure to find more failures: yield-based scoring, stronger variants of the best program, retirement, at most 12 programs. \\
+\BR{} & \BOLD{} plus the minimal guard (added negations, split-up questions, much longer options) and a 25\% lineage cap. \textbf{Final configuration.} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Table~\ref{tab:configs} summarises the five configurations. The \HW{} baseline runs without the fixed check and the guard, because its programs are written by us and never change. Applying the guard afterwards to its failures removes at most 4\% of its distinct failing questions (Qwen3-8B, all three runs together: 99$\to$95; 1.7B: 181$\to$180; 32B and all image models: unchanged), so this does not affect the comparison. They were developed in this order, each in response to a
-problem observed with the previous one; Section~\ref{sec:results} reports them side by side.
+Table~\ref{tab:configs} summarises the five configurations. They were developed in this order, each in response to a
+problem observed with the previous one; Section~\ref{sec:results} reports them side by side. The \HW{} baseline runs
+without the fixed check and the guard, because its programs are written by us and never change. Applying the guard
+afterwards to its failures removes at most 4\% of its distinct failing questions (Qwen3-8B, all three runs together:
+99$\to$95; 1.7B: 181$\to$180; 32B and all image models: unchanged), so this does not affect the comparison.
+
+% ================================================================ 3
+\section{Implementation}
+\label{sec:impl}
+
+The fuzzer is about 2{,}700 lines of Python, available at \url{https://github.com/yu-kuai/cs6223-code}.
+
+\textbf{Components.} \texttt{fuzz\_loop.py} implements the loop of Figure~\ref{fig:loop}: scheduling, program
+synthesis, smoke tests, tested repairs, retirement and failure clustering. \texttt{prompts.py} holds the prompts for the
+program writer, the repairer and the judge. \texttt{llm\_client.py} talks to local models and to the hosted API through
+the same OpenAI-compatible interface and keeps the call budget: every call is tagged with a role (synthesis, repair,
+\texttt{mutate}, target, judge), and only the counted roles are charged to the 5{,}000-call budget. The loop writes its
+state and an event log once per round, so a run can resume after its cluster job hits the time limit.
+\texttt{judge\_api\_grade.py} re-grades all failures after a run, \texttt{debatable.py} detects the two trick patterns
+of Section~\ref{sec:rq2}, and \texttt{compare\_v2.py} builds the result tables.
+
+\textbf{Sandbox.} Model-written code is untrusted. Each program runs in a separate Python worker process started in
+isolated mode, with an empty environment and a throw-away working directory, an import allow-list (standard text
+modules, plus PIL and NumPy for images), restricted built-ins, and resource limits of 2\,GB memory, 30\,s CPU and no
+file writes, plus a wall-clock timeout. Programs reach the LLM and the similarity helper only through requests to the
+parent process, which charges them to the budget.
+
+\textbf{Reused components.} Local models are served with vLLM~\cite{kwon2023vllm}; one server per run plays fuzzer,
+target and (in \SJ{}) judge. The judge (GLM-5.3-Flash) and grader (DeepSeek-V4.1-Flash) are accessed through a
+hosted OpenAI-compatible API. Sentence similarity uses the MiniLM model of Sentence-Transformers~\cite{reimers2019sbert}.
+Data come from MMLU~\cite{hendrycks2021mmlu} and ScienceQA~\cite{lu2022scienceqa} via Hugging Face. Everything else
+(loop, prompts, checks, sandbox, seed programs, analysis) was written for this project.
+
+\textbf{Challenges.} (1) \emph{Judge exploitation}: the first adaptive configuration produced many accepted failures that
+were tricks; we addressed this with the non-editable guard rather than a stricter prompt, because the judge is the very
+component being exploited. (2) \emph{Budget accounting}: model-written programs may call the LLM inside
+\texttt{mutate}, so these calls are counted, or a program could hide unlimited search inside one test. (3)
+\emph{Cluster engineering}: runs used one A100 (40 or 80\,GB) or H100 (96\,GB) GPU each on a Slurm cluster; the
+Python environment is packed into one archive and unpacked on each node, because the shared file system was too slow
+for many small files.
+
+\textbf{Not supported.} Only multiple-choice questions are supported, and there is no automatic check that a mutated
+image still contains the information needed to answer (Section~\ref{sec:limits}).
 
 % ================================================================ 4
-\section{Experimental Setup}
+\section{Evaluation}
 
-\paragraph{Models and data.} Text: Qwen3 1.7B, 8B and 32B~\citep{yang2025qwen3} on 1{,}140 MMLU test
-questions~\citep{hendrycks2021mmlu} (20 per subject, 57 subjects). Images: Qwen3-VL 2B, 8B and 32B (Instruct) on all
-2{,}017 test questions of ScienceQA~\citep{lu2022scienceqa} that have an image. All local models are served with
-vLLM~\citep{kwon2023vllm}, with thinking disabled; the target answers greedily. Baseline accuracies are 0.577, 0.819
-and 0.874 (text) and 0.858, 0.931 and 0.965 (images).
+\subsection{Research Questions}
+\label{sec:rqs}
 
-\paragraph{Budget.} A run stops after 5{,}000 counted calls: program synthesis and repair, LLM calls made inside
-\texttt{mutate}, and target answers. Judge calls are counted when the judge is the local model (\SJ{}) and not counted
-for the API judge. Each configuration is run with three random seeds; we report mean $\pm$ standard deviation.
+\begin{itemize}[leftmargin=*]
+  \item \textbf{RQ1 (Mutation reliability).} How often do LLM-generated mutations preserve the answer, and what breaks
+        them? \emph{Evidence:} share of failures that are real, with and without access to the answer; smoke-test and
+        repair acceptance rates.
+  \item \textbf{RQ2 (Detection reliability).} How accurately can the model itself, or an external LLM, decide whether a
+        detected inconsistency is a real failure? \emph{Evidence:} audit labels of the failures each judge accepts.
+  \item \textbf{RQ3 (Feedback).} Under a fixed call budget, does validity-and-diversity feedback find more distinct
+        valid failures than hand-written mutations? \emph{Evidence:} distinct failing questions per configuration,
+        and their growth over rounds.
+  \item \textbf{RQ4 (Self-testing).} What changes when the tested model also writes and judges its own tests?
+        \emph{Evidence:} comparison of \SJ{} with the externally judged configurations.
+\end{itemize}
 
-\paragraph{Grading and audits.} The in-loop verdict is part of the method and cannot be trusted as its evaluation.
+\textbf{Metrics.} A \emph{real failure} is a failure that the independent grader marks VALID: the change kept the same
+correct answer, so the tested model, not the mutation, is at fault. The main metric is the number of \textbf{distinct
+seed questions with at least one real failure}, which rewards breadth rather than repeated variants of one question.
+We also report the \emph{real share}, the fraction of failures that are real (precision of the pipeline), and real
+failures per 1{,}000 tests.
+
+\subsection{Experimental Setup}
+
+\textbf{Models and data.} Text: Qwen3 1.7B, 8B and 32B~\cite{yang2025qwen3} on 1{,}140 MMLU test
+questions~\cite{hendrycks2021mmlu} (20 per subject, 57 subjects). Images: Qwen3-VL 2B, 8B and 32B (Instruct) on all
+2{,}017 test questions of ScienceQA~\cite{lu2022scienceqa} that have an image. Thinking is disabled and the target
+answers greedily. Baseline accuracies are 0.577, 0.819 and 0.874 (text) and 0.858, 0.931 and 0.965 (images).
+
+\textbf{Baseline.} \HW{} (hand-written mutations, no learning) is the baseline for RQ3; the other four configurations
+of Table~\ref{tab:configs} isolate one design decision each.
+
+\textbf{Budget and repetitions.} A run stops after 5{,}000 counted calls: program synthesis and repair, LLM calls made
+inside \texttt{mutate}, and target answers. Judge calls are counted when the judge is the local model (\SJ{}) and not
+counted for the API judge. Each configuration is run with three random seeds; we report mean $\pm$ standard deviation.
+
+\textbf{Grading and audits.} The in-loop verdict is part of the method and cannot be trusted as its evaluation.
 After each run, every failure is therefore re-graded by a different LLM, DeepSeek-V4.1-Flash, with the same judge
-prompt (and both images for VQA; it answers 39/40 ScienceQA questions with the image versus 26/40 without). We then
-audit blind, shuffled samples with three labels: \emph{fair} (same answer, natural question), \emph{trick} (answer
-technically preserved but unnatural, e.g.\ a double negation or a question broken into fragments) and \emph{broken}
-(answer changed or required information lost). The audit covers 150 failures from \SJ{}-era runs, 60 from \BOLD{} and 40
-image failures accepted by DeepSeek. The audit labels were produced by an AI assistant
-instructed to act as a careful human annotator, not by the authors (see Section~\ref{sec:limits}).
+prompt (Appendix~\ref{app:prompt}; both images for VQA; it answers 39/40 ScienceQA questions with the image versus 26/40
+without). We then audit blind, shuffled samples with three labels: \emph{fair} (same answer, natural question),
+\emph{trick} (answer technically preserved but unnatural, e.g.\ a double negation or a question broken into fragments)
+and \emph{broken} (answer changed or required information lost). The audit covers 150 failures from \SJ{}-era runs,
+60 from \BOLD{} and 40 image failures accepted by DeepSeek. The audit labels were produced by an AI assistant
+instructed to act as a careful human annotator, not by the authors (Section~\ref{sec:limits}).
 
-\paragraph{Metrics.} The main metric is the number of \textbf{distinct seed questions with at least one real failure}
-(DeepSeek VALID), which rewards breadth rather than repeated variants of one question. We also report the share of
-target-answer changes that are real (precision of the pipeline) and real failures per 1{,}000 tests.
-
-% ================================================================ 5
-\section{Results}
+\subsection{Results and Analysis}
 \label{sec:results}
-
-\subsection{RQ1: How reliable are generated mutations?}
 
 \begin{table}[t]
 \centering
 \caption{Example of a real failure and of the three audit labels (MMLU).}
 \label{tab:example}
 \small
-\begin{tabularx}{\linewidth}{lYl}
+\begin{tabularx}{\linewidth}{@{}lYl@{}}
 \toprule
  & Question / change & Label \\
 \midrule
 Original & \emph{The complex proposition fallacy involves \dots}; correct option A
            (``including more than one claim\dots''). Qwen3-32B answers A. & \\
-Options shuffled & Same text, the correct option is now C. Qwen3-32B still answers A. & fair (real failure)\\
+Options shuffled & Same text, the correct option is now C. Qwen3-32B still answers A. & fair \\
 \addlinespace
 Double negation & ``Which of the following is NOT NOT the difference between a direct leak and a side channel?'' & trick \\
-Image change & ScienceQA magnets pixelated until the N/S labels are unreadable (Figure~\ref{fig:images}c). & broken \\
+Image change & ScienceQA magnets pixelated until the N/S labels are unreadable (Fig.~\ref{fig:images}c). & broken \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Table~\ref{tab:example} illustrates the three outcomes. Most invalid text mutations change the semantics of the question
-or options (a paraphrase that changes what is asked, an inserted ``fact'' that contradicts an option); most invalid
-image mutations remove information (unreadable labels, recoloured material cues).
+\subsubsection{RQ1: How reliable are generated mutations?}
 
-\paragraph{Exposure to the answer.} The strongest single effect on validity is whether programs can see the gold
+Table~\ref{tab:example} illustrates the three outcomes. Most invalid text mutations change the semantics of the
+question or options (a paraphrase that changes what is asked, an inserted ``fact'' that contradicts an option); most
+invalid image mutations remove information (unreadable labels, recoloured material cues).
+
+\textbf{Exposure to the answer.} The strongest single effect on validity is whether programs can see the gold
 label. In a diagnostic \OJ{} run on Qwen3-1.7B with the answer visible, the programs produced 409 failures, of which
 only 76 (19\%) were real; with the answer hidden, 80\% of failures were real (Table~\ref{tab:text}). With the label in
 view, programs learn to edit the correct option itself (shortening it, adding a hedge, or swapping in a near-synonym that
 is no longer correct), which reliably flips the answer but is not a model error.
 
-\paragraph{Program synthesis.} In \BR{}, 43\% of new text programs (275/644) and 52\% of new image programs (484/930)
+\textbf{Program synthesis.} In \BR{}, 43\% of new text programs (275/644) and 52\% of new image programs (484/930)
 passed the smoke test. Repairs are harder: 109 of 222 text repair attempts did not produce a runnable program, and of
 the 113 that did, 35 (31\%) passed the repair test; for images, 29 of 96 tested repairs (30\%) were accepted.
 Without testing (\SJ{}), a repair replaces its program even when it breaks more questions, which contributes to the low
 precision reported below.
 
-\subsection{RQ2: Who can tell a real failure from a broken test?}
+\subsubsection{RQ2: Who can tell a real failure from a broken test?}
 \label{sec:rq2}
 
 \begin{table}[t]
 \centering
-\caption{Audit of failures \emph{accepted} (VALID) by each judge. Each cell is the share of the judge's accepted
-failures with that audit label. Top: failures from \SJ{}-era runs; bottom: failures from \BOLD{} runs.}
+\caption{Audit of failures \emph{accepted} (VALID) by each judge: share of the accepted failures with each audit label.
+Counts in Appendix~\ref{app:audit}.}
 \label{tab:judges}
 \small
-\begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{llrrrr}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}llrrrr@{}}
 \toprule
-Sample & Judge & Accepted & Fair & Trick & Broken \\
+Sample & Judge & Acc. & Fair & Trick & Broken \\
 \midrule
-\multirow{3}{*}{150 text, \SJ{}-era} & Tested model (self) & 102 & 57\% & 6\% & \textbf{37\%} \\
- & Qwen3-32B (external) & 78 & 67\% & 12\% & 22\% \\
- & DeepSeek (grader, 52 graded) & 25 & 92\% & 8\% & 0\% \\
+150 text, & Tested model (self) & 102 & 57\% & 6\% & \textbf{37\%} \\
+\SJ{}-era & Qwen3-32B & 78 & 67\% & 12\% & 22\% \\
+ & DeepSeek (52 graded) & 25 & 92\% & 8\% & 0\% \\
 \midrule
-\multirow{2}{*}{60 text, \BOLD{}} & GLM (in-loop) & 54 & 41\% & \textbf{59\%} & 0\% \\
- & DeepSeek (grader) & 45 & 33\% & \textbf{67\%} & 0\% \\
+60 text, & GLM (in-loop) & 54 & 41\% & \textbf{59\%} & 0\% \\
+\BOLD{} & DeepSeek & 45 & 33\% & \textbf{67\%} & 0\% \\
 \midrule
-40 image (all DeepSeek-accepted) & DeepSeek: \HW{} & 20 & 100\% & 0\% & 0\% \\
+40 image & DeepSeek: \HW{} & 20 & 100\% & 0\% & 0\% \\
  & DeepSeek: \BR{} & 20 & 45\% & 15\% & \textbf{40\%} \\
 \bottomrule
 \end{tabular}
-\end{adjustbox}
 \end{table}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.95\linewidth]{figures/fig_judges.pdf}
+\includegraphics[width=\linewidth]{figures/fig_judges.pdf}
 \caption{Audit of the failures each judge accepted as real. Self-judging accepts broken tests; external judges accept
 tricks on text; the grader accepts broken images.}
 \label{fig:judges}
@@ -395,23 +446,22 @@ preserve the answer in a strict logical sense but that no person would write: do
 \dots'', ``NOT the one that is NOT \dots'') and \emph{fragmented} questions, where the original words remain in order
 but filler text is inserted between them. Both GLM and DeepSeek accepted these as valid: 59\% and 67\% of their
 accepted \BOLD{} failures were tricks. Because the grader shares the blind spot, these tricks also inflate the
-DeepSeek-graded counts. We therefore wrote a detector for both patterns (it flags 30 of the 32 tricks in the sample and no fair or broken case) and report a \emph{strict} count that treats them as broken.
+DeepSeek-graded counts. We therefore wrote a detector for both patterns (it flags 30 of the 32 tricks in the sample and
+no fair or broken case) and report a \emph{strict} count that treats them as broken.
 
 \textbf{The image grader is lenient.} For images, DeepSeek accepted \BR{} failures in which the image had been
 pixelated, inverted or blurred until the needed label or cue was gone (Figure~\ref{fig:images}b,c): 40\% of the sampled
-accepted image failures were broken, against none for \HW{}. The grader tends to reason about what the image \emph{should}
-show rather than what is still visible.
+accepted image failures were broken, against none for \HW{}. The grader tends to reason about what the image
+\emph{should} show rather than what is still visible.
 
-\subsection{RQ3: Does feedback find more distinct failures?}
+\subsubsection{RQ3: Does feedback find more distinct failures?}
 
-\begin{table}[t]
+\begin{table*}[t]
 \centering
 \caption{Text (MMLU). Distinct questions with a real failure (DeepSeek-graded, mean$\pm$std over 3 runs) and share of
 answer changes that are real. \emph{Strict} counts double negations and fragmented questions as broken.}
 \label{tab:text}
 \small
-\setlength{\tabcolsep}{4pt}
-\begin{adjustbox}{max width=\linewidth}
 \begin{tabular}{lrrrrrrrrr}
 \toprule
  & \multicolumn{3}{c}{Distinct questions} & \multicolumn{3}{c}{Distinct questions (strict)} & \multicolumn{3}{c}{Real share} \\
@@ -426,88 +476,86 @@ Config & 1.7B & 8B & 32B & 1.7B & 8B & 32B & 1.7B & 8B & 32B \\
 \BR{}           & 100\pmstd{20} & 59\pmstd{40}  & 39\pmstd{15} & 100 & 59 & 39 & 89\% & 42\% & 62\% \\
 \bottomrule
 \end{tabular}
-\end{adjustbox}
-\end{table}
+\end{table*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_text_distinct.pdf}
+\includegraphics[width=0.85\linewidth]{figures/fig_text_distinct.pdf}
 \caption{Text: distinct questions with a real failure (DeepSeek-graded; mean and std over 3 runs). The hatched part
 of \BOLD{} consists of tricks (double negations and fragmented questions); without them, \BOLD{} is back at the level
 of \HW{} on 8B and 32B. \BR{} produces no tricks.}
 \label{fig:text}
-\end{figure}
+\end{figure*}
 
 Table~\ref{tab:text} and Figure~\ref{fig:text} give the text results.
 
-\paragraph{\BOLD{} looks strong only because of tricks.} \BOLD{} finds 1.7--2.8$\times$ more distinct failing questions than
-\HW{} under DeepSeek grading. For 8B and 32B, almost all of the gain disappears under the strict count (135$\to$57 and
-80$\to$31), and its real share falls to 25\% and 28\%. Only on 1.7B is its gain robust (169 vs.\ 98), because the
-smallest model fails on many ordinary mutations.
+\textbf{\BOLD{} looks strong only because of tricks.} \BOLD{} finds 1.7--2.8$\times$ more distinct failing questions
+than \HW{} under DeepSeek grading. For 8B and 32B, almost all of the gain disappears under the strict count
+(135$\to$57 and 80$\to$31), and its real share falls to 25\% and 28\%. Only on 1.7B is its gain robust (169 vs.\ 98),
+because the smallest model fails on many ordinary mutations.
 
-\paragraph{\BR{} is honest and slightly better than \HW{}.} With the rules, the strict and normal counts coincide
+\textbf{\BR{} is honest and slightly better than \HW{}.} With the rules, the strict and normal counts coincide
 exactly: the fuzzer no longer produces the tricks, rather than producing them and having them filtered. \BR{} finds 100,
 59 and 39 distinct questions versus 99, 49 and 33 for \HW{}, and more real failures per 1{,}000 tests (64 vs.\ 54, 37
 vs.\ 26, 24 vs.\ 15). The run-to-run spread is large (8B: $\pm40$), so the advantage on text is modest rather than
-decisive. On 8B, \BR{} has a high false-alarm rate (42\% real); one of the three runs produced 413 of its 597 answer changes.
+decisive. On 8B, \BR{} has a high false-alarm rate (42\% real); one of the three runs produced 413 of its 597 answer
+changes.
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=0.72\linewidth]{figures/fig_tradeoff.pdf}
+\includegraphics[width=0.9\linewidth]{figures/fig_tradeoff.pdf}
 \caption{Quantity versus quality on text (strict counts). Up and to the right is better. \BR{} (dark blue) is the
 only adaptive configuration that is never worse than \HW{} (grey) in quantity while staying competitive in precision on
 1.7B and 32B.}
 \label{fig:tradeoff}
 \end{figure}
 
-\paragraph{\OJ{} is clean but timid.} Hiding the answer and using an external judge yields the highest precision on
+\textbf{\OJ{} is clean but timid.} Hiding the answer and using an external judge yields the highest precision on
 1.7B (80\%) but finds only 55 distinct questions: without pressure towards stronger mutations, the model writes cautious
-programs. This motivated the yield-based scoring of \BOLD{}.
+programs (Figure~\ref{fig:tradeoff}). This motivated the yield-based scoring of \BOLD{}.
 
 \begin{table}[t]
 \centering
-\caption{Images (ScienceQA). Distinct questions with a failure accepted by DeepSeek (mean$\pm$std), and the \BR{} count
-corrected by the audit rate of truly fair failures (Table~\ref{tab:judges}; 4--8 audited cases per model, so the
-correction is rough).}
+\caption{Images (ScienceQA). Distinct questions with a failure accepted by DeepSeek (mean$\pm$std), real share, and the
+\BR{} count corrected by the audit rate of truly fair failures (4--8 audited cases per model, so rough).}
 \label{tab:img}
 \small
-\begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{lrrrr}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrr@{}}
 \toprule
-Config & VL-2B & VL-8B & VL-32B & Real share (2B/8B/32B) \\
+Config & VL-2B & VL-8B & VL-32B & Real share \\
 \midrule
-\HW{}                & 40\pmstd{9}  & 29\pmstd{3}   & 16\pmstd{2}  & 93\% / 92\% / 92\% \\
-\SJ{}                & 27\pmstd{9}  & 46\pmstd{8}   & 12\pmstd{11} & 9\% / 39\% / 75\% \\
-\quad + letter check & 36\pmstd{21} & 32\pmstd{19}  & --           & 42\% / 36\% / -- \\
-\BR{} (DeepSeek)     & 39\pmstd{28} & 101\pmstd{37} & 50\pmstd{28} & 81\% / 42\% / 73\% \\
-\BR{} (audit-corrected) & $\sim$20 & $\sim$13 & \textbf{$\sim$37} & \\
+\HW{}                & 40\pmstd{9}  & 29\pmstd{3}   & 16\pmstd{2}  & 93/92/92\% \\
+\SJ{}                & 27\pmstd{9}  & 46\pmstd{8}   & 12\pmstd{11} & 9/39/75\% \\
+\quad + letter check & 36\pmstd{21} & 32\pmstd{19}  & --           & 42/36/--\% \\
+\BR{} (DeepSeek)     & 39\pmstd{28} & 101\pmstd{37} & 50\pmstd{28} & 81/42/73\% \\
+\BR{} (corrected)    & $\sim$20 & $\sim$13 & \textbf{$\sim$37} & \\
 \bottomrule
 \end{tabular}
-\end{adjustbox}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\begin{subfigure}[t]{\linewidth}\centering
-  \includegraphics[height=3.0cm]{figures/fair_orig.png}\hspace{4pt}
-  \includegraphics[height=3.0cm]{figures/fair_new.png}
+\begin{subfigure}[t]{0.44\textwidth}\centering
+  \includegraphics[width=0.48\linewidth]{figures/fair_orig.png}\hfill
+  \includegraphics[width=0.48\linewidth]{figures/fair_new.png}
   \caption{Fair: unrelated science words pasted on a map; the highlighted ocean is still clear. Qwen3-VL-32B changes
            its answer.}
-\end{subfigure}\\[6pt]
-\begin{subfigure}[t]{0.48\linewidth}\centering
-  \includegraphics[height=2.5cm]{figures/broken_orig.png}\hspace{3pt}
-  \includegraphics[height=2.5cm]{figures/broken_new.png}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.22\textwidth}\centering
+  \includegraphics[width=0.48\linewidth]{figures/broken_orig.png}\hfill
+  \includegraphics[width=0.48\linewidth]{figures/broken_new.png}
   \caption{Broken: inverted colours make a wooden spatula look like blue plastic (``Which material?'').}
 \end{subfigure}\hfill
-\begin{subfigure}[t]{0.48\linewidth}\centering
-  \includegraphics[width=0.95\linewidth]{figures/broken2_orig.png}\\[2pt]
-  \includegraphics[width=0.95\linewidth]{figures/broken2_new.png}
+\begin{subfigure}[t]{0.30\textwidth}\centering
+  \includegraphics[width=\linewidth]{figures/broken2_orig.png}\\[2pt]
+  \includegraphics[width=\linewidth]{figures/broken2_new.png}
   \caption{Broken: pixelation removes the N/S labels and distances of the magnets (top: original; bottom: mutated).}
 \end{subfigure}
-\caption{Image mutations written by the model in \BR{} and accepted by the DeepSeek grader (left of each pair:
-original; right: mutated). Only (a) is a fair test.}
+\caption{Image mutations written by the model in \BR{} and accepted by the DeepSeek grader (in (a) and (b), left:
+original, right: mutated). Only (a) is a fair test.}
 \label{fig:images}
-\end{figure}
+\end{figure*}
 
 \begin{figure}[t]
 \centering
@@ -517,57 +565,52 @@ solid bar the count corrected by the sample audit (rough, 4--8 audited cases per
 \label{fig:imgbars}
 \end{figure}
 
-\paragraph{Images.} Table~\ref{tab:img} and Figure~\ref{fig:imgbars} give the image results. The hand-written image programs are mild and almost
-always valid (92--93\%) but find few failures, and fewer for stronger models. \BR{} learns substantially stronger image
-transformations. On VL-32B, most of its accepted failures are fair and it finds roughly twice as many distinct failing
-questions as \HW{} (about 37 vs.\ 16 after correction). On VL-8B it over-perturbs: DeepSeek accepts 101 distinct
-questions, but only one of eight audited failures is fair, so the corrected count (about 13) is below \HW{}. Without the
-audit, we would have reported a 3.5$\times$ gain on VL-8B that does not exist.
+\textbf{Images.} Table~\ref{tab:img} and Figure~\ref{fig:imgbars} give the image results. The hand-written image
+programs are mild and almost always valid (92--93\%) but find few failures, and fewer for stronger models. \BR{}
+learns substantially stronger image transformations (Figure~\ref{fig:images}). On VL-32B, most of its accepted
+failures are fair and it finds roughly twice as many distinct failing questions as \HW{} (about 37 vs.\ 16 after
+correction). On VL-8B it over-perturbs: DeepSeek accepts 101 distinct questions, but only one of eight audited
+failures is fair, so the corrected count (about 13) is below \HW{}. Without the audit, we would have reported a
+3.5$\times$ gain on VL-8B that does not exist.
 
-\subsection{Does the loop improve over rounds?}
-\label{sec:rounds}
-
-A \emph{round} is one iteration of the loop: 48 tests, followed by feedback (scoring, new programs, tested repairs,
-retirement). A run ends when its 5{,}000 counted calls are used up, so the number of rounds differs between runs:
-70--74 for \HW{} text runs and 104--108 for \HW{} image runs, but 35--143 for \BR{}, because model-written programs
-that call the LLM inside \texttt{mutate} and the synthesis and repair prompts consume part of the budget. We plot
-against the actual round number, without rescaling, so that both the speed of improvement and the length of each run
-remain visible.
-
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_over_rounds.pdf}
-\caption{Cumulative number of distinct questions with a real failure (DeepSeek-graded) against the round number. Each
-line is one run; the dot marks the end of the run. A steeper line means faster discovery.}
+\includegraphics[width=0.9\linewidth]{figures/fig_over_rounds.pdf}
+\caption{Cumulative number of distinct questions with a real failure (DeepSeek-graded) against the round number
+(1 round = 48 tests). Each line is one of the 3 runs; the dot marks the end of the run. A steeper line means faster
+discovery.}
 \label{fig:rounds}
-\end{figure}
+\end{figure*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_rates_over_rounds.pdf}
+\includegraphics[width=0.9\linewidth]{figures/fig_rates_over_rounds.pdf}
 \caption{Real (solid) and broken (dashed) failures per 100 tests in blocks of 10 rounds, pooled over the runs still
 active in that block (late blocks of \BR{} therefore come from a single long run).}
 \label{fig:rates}
-\end{figure}
+\end{figure*}
 
-Figure~\ref{fig:rounds} shows that \HW{} discovers failures at a nearly constant rate, as expected from a fixed set of
-programs. \BR{} starts at the same rate and then, in several runs, accelerates once the model has written stronger
-programs: the curves bend upwards after about 20 rounds (one Image 8B run) to 60--70 rounds (Text 8B, Image 32B). The final counts per
-run show the same picture with high variance: on Image 32B the three \BR{} runs reach 80, 43 and 26 distinct questions
-against 14--17 for \HW{}; on Text 8B the longest run reaches 105 against 46--53, but the two short runs (35 and 62
-rounds) end at 30 and 42. Their programs called the LLM inside \texttt{mutate} so often that these calls used 3{,}853
-and 2{,}921 of the 5{,}000 calls (889 in the long run), leaving few calls for testing.
+\textbf{Improvement over rounds.} A run ends when its 5{,}000 counted calls are used up, so the number of rounds
+differs between runs: 70--74 for \HW{} text runs and 104--108 for \HW{} image runs, but 35--143 for \BR{}, because
+model-written programs that call the LLM inside \texttt{mutate} and the synthesis and repair prompts consume part of
+the budget. We plot against the actual round number, without rescaling, so that both the speed of improvement and the
+length of each run remain visible. Figure~\ref{fig:rounds} shows that \HW{} discovers failures at a nearly constant
+rate, as expected from a fixed set of programs. \BR{} starts at the same rate and then, in several runs, accelerates
+once the model has written stronger programs: the curves bend upwards after about 20 rounds (one Image 8B run) to
+60--70 rounds (Text 8B, Image 32B). The final counts per run show high variance: on Image 32B the three \BR{} runs
+reach 80, 43 and 26 distinct questions against 14--17 for \HW{}; on Text 8B the longest run reaches 105 against
+46--53, but the two short runs (35 and 62 rounds) end at 30 and 42. Their programs called the LLM inside
+\texttt{mutate} so often that these calls used 3{,}853 and 2{,}921 of the 5{,}000 calls (889 in the long run), leaving
+few calls for testing.
 
 Figure~\ref{fig:rates} separates real from broken failures. On Image 2B and Image 32B, the real-failure rate of
 \BR{} rises over the run while the broken rate stays low: the loop learns. On Text 1.7B both rates stay roughly flat,
 with \BR{} above \HW{} in real failures and below it in broken ones; on Text 32B the broken rate peaks mid-run and then
-falls again as broken programs are repaired or retired. On Text 8B and Image 8B, the broken rate
-rises together with the real rate and eventually exceeds it, which matches the low precision in
-Tables~\ref{tab:text} and~\ref{tab:img}: the loop learns stronger mutations, but the judge does not stop it from
-overshooting. The two kinds of improvement, more real failures and more broken tests, are therefore not separable by
-the in-loop judge alone.
+falls again as broken programs are repaired or retired. On Text 8B and Image 8B, the broken rate rises together with
+the real rate and eventually exceeds it, which matches the low precision in Tables~\ref{tab:text} and~\ref{tab:img}:
+the loop learns stronger mutations, but the judge does not stop it from overshooting.
 
-\subsection{RQ4: What does self-testing change?}
+\subsubsection{RQ4: What does self-testing change?}
 
 The model under test can be a productive \emph{generator}: in \BR{}, programs written by the model account for the
 gains on Qwen3-8B/32B text and on VL-32B images. It is a poor \emph{judge}: with self-judging, the real share falls to
@@ -576,43 +619,67 @@ the loop entirely therefore does not work; the loop needs an independent judge, 
 non-LLM constraints, because an optimising generator will find the judge's blind spots. A useful analogy is reward
 hacking: the judge is a learned reward, and the fuzzer is an optimiser against it.
 
-% ================================================================ 6
-\section{Discussion}
+\subsection{Limitations and Threats to Validity}
+\label{sec:limits}
 
-\subsection{Summary}
+\textbf{Audit labels.} The audit labels were produced by an AI assistant acting as a careful human annotator, on
+samples of 150, 60 and 40 failures, not by people. The image correction relies on 4--8 audited cases per model and is
+only an order-of-magnitude estimate.
+
+\textbf{Variance.} Three runs per configuration; the standard deviation is large for adaptive configurations
+because a single successful program family can dominate a run.
+
+\textbf{Sequential development.} Each configuration was designed after observing the previous one, so \BR{}'s rules
+were informed by the \BOLD{} audit. The rules are generic (negation, fragmenting, option length), but they were not
+validated on held-out models.
+
+\textbf{Scope.} One model family (Qwen3), one dataset per modality, multiple-choice questions only. The API judge and
+grader were test deployments of GLM-5.3-Flash and DeepSeek-V4.1-Flash; their behaviour may change.
+
+\textbf{Image validity.} We did not find a reliable automatic check that an image still contains the information
+needed to answer; the grader alone is insufficient.
+
+% ================================================================ 5
+\section{Related Work}
+
+\textbf{Metamorphic testing of NLP models and LLMs.} CheckList~\cite{ribeiro2020checklist} introduced
+capability-oriented behavioural tests, including invariance tests that are metamorphic relations. Later work extended MT
+to systematicity and transitivity~\cite{manino2022systematicity}, built general frameworks for LLM
+qualities~\cite{hyun2023metal}, generated knowledge-based consistency queries~\cite{rajan2024kontest}, and grounded
+relations in formal logic to avoid semantic drift~\cite{zhou2026lgmt}. The large study of \citet{cho2025mt}
+catalogues 191 relations and highlights false positives caused by the transformations themselves, which is the issue we
+measure directly.
+
+\textbf{LLMs as fuzzers and as judges.} Fuzz4All~\cite{xia2024fuzz4all} uses an LLM to generate and evolve test
+inputs from feedback, and HalluTrigger~\cite{liu2026hallutrigger} prioritises metamorphic pairs using hidden states of
+open-source targets. LLM-as-a-judge~\cite{zheng2023judge} is a common way to score generated outputs, but it is known
+to be biased and exploitable. Our setting combines both roles with the target itself, in a fully black-box loop, and we
+measure how reliable each role is.
+
+% ================================================================ 6
+\section{Conclusion}
 
 We built a closed-loop metamorphic fuzzer in which LLMs write, schedule and repair their own test programs, and
 evaluated it on three text and three vision models. The main lesson is that, in LLM-guided MT, the measurement problem
 dominates the search problem. Finding answer changes is easy; deciding which ones are real failures is where the model
 itself, an external LLM judge and an LLM grader each fail in a different way. With the answer hidden, an independent
 judge and a few fixed rules, the self-evolving loop is at least as good as hand-written mutations on text and clearly
-better on the strongest vision model.
+better on the strongest vision model, but it over-perturbs images for smaller models.
 
-\subsection{Limitations}
-\label{sec:limits}
+\textbf{Future work.} The most direct improvement is a code-level information check for images, such as requiring OCR
+of the original text labels to still succeed on the mutated image, analogous to the number and negation checks for
+text. A second direction is to replace the audit by a small study with human annotators, which would also allow
+measuring judge recall. Finally, the loop could be run in a cross-model setting (a strong fuzzer testing a weaker
+target, and vice versa) to separate the effect of the generator's capability from that of self-testing.
 
-\begin{itemize}
-  \item \textbf{Audit labels.} The audit labels were produced by an AI assistant acting as a careful human annotator, on
-        samples of 150, 60 and 40 failures. The image correction relies on 4--8 audited cases per model and is only an
-        order-of-magnitude estimate.
-  \item \textbf{Variance.} Three runs per configuration; the standard deviation is large for adaptive configurations
-        because a single successful program family can dominate a run.
-  \item \textbf{Configurations were developed sequentially.} Each configuration was designed after observing the
-        previous one, so \BR{}'s rules were informed by the \BOLD{} audit. The rules are generic (negation, fragmenting,
-        option length), but they were not validated on held-out models.
-  \item \textbf{Scope.} One model family (Qwen3), one dataset per modality, multiple-choice questions only. The API
-        judge and grader were test deployments of GLM-5.3-Flash and DeepSeek-V4.1-Flash; their behaviour may change.
-  \item \textbf{Image validity.} We did not find a reliable automatic check that an image still contains the
-        information needed to answer; the grader alone is insufficient.
-\end{itemize}
-
-\subsection{Future Work}
-
-The most direct improvement is a code-level information check for images, such as requiring OCR of the original text
-labels to still succeed on the mutated image, analogous to the number and negation checks for text. A second direction
-is to replace the audit by a small study with human annotators, which would also allow measuring judge recall. Finally,
-the loop could be run in a cross-model setting (a strong fuzzer testing a weaker target, and vice versa) to separate
-the effect of the generator's capability from that of self-testing.
+% ================================================================ optional
+% \section{Division of Work}
+% TODO (optional): describe each member's actual contributions, e.g.
+% \begin{itemize}
+%     \item \textbf{Shiu-Hong Kao:} ...
+%     \item \textbf{Kuai Yu:} ...
+%     \item \textbf{Xinyao Liao:} ...
+% \end{itemize}
 
 \section*{AI Declaration}
 
@@ -621,86 +688,70 @@ labelling the audit samples as described in Section~\ref{sec:limits}, and drafti
 decisions, experimental results and final content are the authors' responsibility. We are jointly accountable for the
 correctness of every claim in this report.
 
-\small
-\bibliographystyle{plainnat}
-\bibliography{references}
-\normalsize
+\balance
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{ref}
 
 % ================================================================ appendix
-\clearpage
 \appendix
-\section{Full Text Results}
 
-\begin{table}[h]
+\section{Full Results}
+
+\begin{table*}[t]
 \centering
-\caption{Text (MMLU), DeepSeek-graded, mean$\pm$std over 3 runs. \emph{Tests}: mutated tests that reached the target;
+\caption{Full results, DeepSeek-graded, mean$\pm$std over 3 runs. \emph{Tests}: mutated tests that reached the target;
 \emph{Changes}: target answer differs from the expected letter; \emph{Real}: DeepSeek VALID; \emph{Per 1k}: real
 failures per 1{,}000 tests.}
-\label{tab:fulltext}
-\scriptsize
+\label{tab:full}
+\footnotesize
 \setlength{\tabcolsep}{3.5pt}
-\begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{llrrrrrr}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{llrrrrrr@{\hspace{18pt}}llrrrrrr}
 \toprule
-Model & Config & Tests & Changes & Real & Real share & Per 1k & Distinct \\
+\multicolumn{8}{c}{Text (MMLU)} & \multicolumn{8}{c}{Images (ScienceQA)} \\
+\cmidrule(r{18pt}){1-8}\cmidrule{9-16}
+Model & Config & Tests & Changes & Real & Share & Per 1k & Distinct & Model & Config & Tests & Changes & Real & Share & Per 1k & Distinct \\
 \midrule
-\multirow{7}{*}{1.7B} & \HW{} & 2629\pmstd{14} & 188\pmstd{6} & 142\pmstd{6} & 76\% & 54.1 & 99\pmstd{4} \\
- & \SJ{} & 3099\pmstd{159} & 312\pmstd{185} & 176\pmstd{115} & 56\% & 56.8 & 109\pmstd{59} \\
- & \quad + letter check & 2750\pmstd{796} & 304\pmstd{224} & 113\pmstd{44} & 37\% & 41.2 & 81\pmstd{31} \\
- & \OJ{} & 2906\pmstd{1189} & 87\pmstd{19} & 70\pmstd{15} & 80\% & 24.1 & 55\pmstd{13} \\
- & \OJ{}, answer visible (1 run) & 1797 & 409 & 76 & 19\% & 42.3 & 59 \\
- & \BOLD{} & 3277\pmstd{1051} & 450\pmstd{279} & 363\pmstd{191} & 81\% & 110.7 & 170\pmstd{28} \\
- & \BR{} & 2526\pmstd{325} & 183\pmstd{38} & 163\pmstd{30} & 89\% & 64.4 & 100\pmstd{20} \\
-\midrule
-\multirow{6}{*}{8B} & \HW{} & 2687\pmstd{7} & 86\pmstd{6} & 69\pmstd{1} & 80\% & 25.7 & 49\pmstd{4} \\
- & \SJ{} & 2862\pmstd{1255} & 334\pmstd{283} & 52\pmstd{33} & 15\% & 18.1 & 40\pmstd{20} \\
- & \quad + letter check & 3157\pmstd{824} & 171\pmstd{36} & 72\pmstd{28} & 42\% & 22.7 & 55\pmstd{17} \\
- & \OJ{} & 2670\pmstd{1218} & 180\pmstd{129} & 86\pmstd{45} & 48\% & 32.1 & 60\pmstd{26} \\
- & \BOLD{} & 3361\pmstd{1326} & 326\pmstd{319} & 250\pmstd{269} & 77\% & 74.3 & 135\pmstd{129} \\
- & \BR{} & 2267\pmstd{1433} & 199\pmstd{189} & 84\pmstd{71} & 42\% & 37.2 & 59\pmstd{40} \\
-\midrule
-\multirow{5}{*}{32B} & \HW{} & 2775\pmstd{21} & 54\pmstd{9} & 42\pmstd{9} & 79\% & 15.3 & 33\pmstd{6} \\
- & \SJ{} & 1828\pmstd{163} & 105\pmstd{36} & 32\pmstd{9} & 30\% & 17.3 & 26\pmstd{3} \\
- & \OJ{} & 1909\pmstd{39} & 83\pmstd{45} & 36\pmstd{6} & 44\% & 19.0 & 28\pmstd{7} \\
- & \BOLD{} & 1653\pmstd{165} & 138\pmstd{122} & 99\pmstd{103} & 72\% & 60.1 & 80\pmstd{84} \\
- & \BR{} & 2330\pmstd{1334} & 90\pmstd{29} & 56\pmstd{32} & 62\% & 23.9 & 39\pmstd{15} \\
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\end{table}
-
-\section{Full Image Results}
-
-\begin{table}[h]
-\centering
-\caption{Images (ScienceQA), DeepSeek-graded, mean$\pm$std over 3 runs. Columns as in Table~\ref{tab:fulltext}.}
-\label{tab:fullimg}
-\scriptsize
-\setlength{\tabcolsep}{3.5pt}
-\begin{adjustbox}{max width=\linewidth}
-\begin{tabular}{llrrrrrr}
-\toprule
-Model & Config & Tests & Changes & Real & Real share & Per 1k & Distinct \\
-\midrule
-\multirow{4}{*}{VL-2B} & \HW{} & 4403\pmstd{9} & 55\pmstd{11} & 51\pmstd{9} & 93\% & 11.5 & 40\pmstd{9} \\
+1.7B & \HW{} & 2629\pmstd{14} & 188\pmstd{6} & 142\pmstd{6} & 76\% & 54.1 & 99\pmstd{4} &
+VL-2B & \HW{} & 4403\pmstd{9} & 55\pmstd{11} & 51\pmstd{9} & 93\% & 11.5 & 40\pmstd{9} \\
+ & \SJ{} & 3099\pmstd{159} & 312\pmstd{185} & 176\pmstd{115} & 56\% & 56.8 & 109\pmstd{59} &
  & \SJ{} & 3439\pmstd{1107} & 353\pmstd{388} & 31\pmstd{9} & 9\% & 8.9 & 27\pmstd{9} \\
- & \quad + letter check & 4183\pmstd{612} & 100\pmstd{59} & 42\pmstd{28} & 42\% & 10.0 & 36\pmstd{21} \\
+ & \quad + letter & 2750\pmstd{796} & 304\pmstd{224} & 113\pmstd{44} & 37\% & 41.2 & 81\pmstd{31} &
+ & \quad + letter & 4183\pmstd{612} & 100\pmstd{59} & 42\pmstd{28} & 42\% & 10.0 & 36\pmstd{21} \\
+ & \OJ{} & 2906\pmstd{1189} & 87\pmstd{19} & 70\pmstd{15} & 80\% & 24.1 & 55\pmstd{13} &
  & \BR{} & 2987\pmstd{1563} & 66\pmstd{38} & 53\pmstd{47} & 81\% & 17.9 & 39\pmstd{28} \\
+ & \OJ{}, ans.\ visible & 1797 & 409 & 76 & 19\% & 42.3 & 59 & & & & & & & & \\
+ & \BOLD{} & 3277\pmstd{1051} & 450\pmstd{279} & 363\pmstd{191} & 81\% & 110.7 & 170\pmstd{28} & & & & & & & & \\
+ & \BR{} & 2526\pmstd{325} & 183\pmstd{38} & 163\pmstd{30} & 89\% & 64.4 & 100\pmstd{20} & & & & & & & & \\
 \midrule
-\multirow{4}{*}{VL-8B} & \HW{} & 4430\pmstd{7} & 40\pmstd{4} & 37\pmstd{4} & 92\% & 8.4 & 29\pmstd{3} \\
+8B & \HW{} & 2687\pmstd{7} & 86\pmstd{6} & 69\pmstd{1} & 80\% & 25.7 & 49\pmstd{4} &
+VL-8B & \HW{} & 4430\pmstd{7} & 40\pmstd{4} & 37\pmstd{4} & 92\% & 8.4 & 29\pmstd{3} \\
+ & \SJ{} & 2862\pmstd{1255} & 334\pmstd{283} & 52\pmstd{33} & 15\% & 18.1 & 40\pmstd{20} &
  & \SJ{} & 4408\pmstd{23} & 136\pmstd{105} & 53\pmstd{10} & 39\% & 11.9 & 46\pmstd{8} \\
- & \quad + letter check & 4361\pmstd{88} & 98\pmstd{113} & 35\pmstd{21} & 36\% & 8.1 & 32\pmstd{19} \\
+ & \quad + letter & 3157\pmstd{824} & 171\pmstd{36} & 72\pmstd{28} & 42\% & 22.7 & 55\pmstd{17} &
+ & \quad + letter & 4361\pmstd{88} & 98\pmstd{113} & 35\pmstd{21} & 36\% & 8.1 & 32\pmstd{19} \\
+ & \OJ{} & 2670\pmstd{1218} & 180\pmstd{129} & 86\pmstd{45} & 48\% & 32.1 & 60\pmstd{26} &
  & \BR{} & 3959\pmstd{553} & 315\pmstd{107} & 132\pmstd{49} & 42\% & 33.3 & 101\pmstd{37} \\
+ & \BOLD{} & 3361\pmstd{1326} & 326\pmstd{319} & 250\pmstd{269} & 77\% & 74.3 & 135\pmstd{129} & & & & & & & & \\
+ & \BR{} & 2267\pmstd{1433} & 199\pmstd{189} & 84\pmstd{71} & 42\% & 37.2 & 59\pmstd{40} & & & & & & & & \\
 \midrule
-\multirow{3}{*}{VL-32B} & \HW{} & 4434\pmstd{11} & 21\pmstd{1} & 19\pmstd{2} & 92\% & 4.3 & 16\pmstd{2} \\
+32B & \HW{} & 2775\pmstd{21} & 54\pmstd{9} & 42\pmstd{9} & 79\% & 15.3 & 33\pmstd{6} &
+VL-32B & \HW{} & 4434\pmstd{11} & 21\pmstd{1} & 19\pmstd{2} & 92\% & 4.3 & 16\pmstd{2} \\
+ & \SJ{} & 1828\pmstd{163} & 105\pmstd{36} & 32\pmstd{9} & 30\% & 17.3 & 26\pmstd{3} &
  & \SJ{} & 4593\pmstd{211} & 20\pmstd{19} & 15\pmstd{16} & 75\% & 3.3 & 12\pmstd{11} \\
+ & \OJ{} & 1909\pmstd{39} & 83\pmstd{45} & 36\pmstd{6} & 44\% & 19.0 & 28\pmstd{7} &
  & \BR{} & 4353\pmstd{168} & 85\pmstd{31} & 62\pmstd{41} & 73\% & 14.2 & 50\pmstd{28} \\
+ & \BOLD{} & 1653\pmstd{165} & 138\pmstd{122} & 99\pmstd{103} & 72\% & 60.1 & 80\pmstd{84} & & & & & & & & \\
+ & \BR{} & 2330\pmstd{1334} & 90\pmstd{29} & 56\pmstd{32} & 62\% & 23.9 & 39\pmstd{15} & & & & & & & & \\
 \bottomrule
 \end{tabular}
 \end{adjustbox}
-\end{table}
+\end{table*}
+
+The full results are in Table~\ref{tab:full}.
 
 \section{Judge Prompt}
+\label{app:prompt}
 
 The in-loop judge and the grader receive the same prompt (abridged; the image version adds both images and lists
 allowed image changes):
@@ -716,22 +767,24 @@ longer clearly correct. [\dots] Respond with a JSON object: reason, verdict, pat
 \end{quote}
 
 \section{Audit Details}
+\label{app:audit}
 
 \begin{table}[h]
 \centering
 \caption{Audit counts behind Table~\ref{tab:judges} (fair / trick / broken).}
 \label{tab:auditcounts}
 \small
-\begin{tabular}{llrr}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrr@{}}
 \toprule
-Sample & Judge & Judge says VALID & Judge says INVALID \\
+Sample & Judge & VALID & INVALID \\
 \midrule
-150 text, \SJ{}-era & Tested model (self) & 58 / 6 / 38 & 14 / 11 / 23 \\
- & Qwen3-32B & 52 / 9 / 17 & 20 / 8 / 44 \\
+150 text, & Tested model (self) & 58 / 6 / 38 & 14 / 11 / 23 \\
+\SJ{}-era & Qwen3-32B & 52 / 9 / 17 & 20 / 8 / 44 \\
  & DeepSeek (52 graded) & 23 / 2 / 0 & 4 / 6 / 17 \\
 \midrule
-60 text, \BOLD{} & GLM & 22 / 32 / 0 & 1 / 0 / 5 \\
- & DeepSeek & 15 / 30 / 0 & 8 / 2 / 5 \\
+60 text, & GLM & 22 / 32 / 0 & 1 / 0 / 5 \\
+\BOLD{} & DeepSeek & 15 / 30 / 0 & 8 / 2 / 5 \\
 \midrule
 40 image & DeepSeek: \HW{} (20) & 20 / 0 / 0 & -- \\
  & DeepSeek: \BR{} VL-2B (4) & 2 / 2 / 0 & -- \\
