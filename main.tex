@@ -374,7 +374,15 @@ Sample & Judge & Accepted & Fair & Trick & Broken \\
 \end{adjustbox}
 \end{table}
 
-Table~\ref{tab:judges} shows three distinct failure modes of LLM judges.
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/fig_judges.pdf}
+\caption{Audit of the failures each judge accepted as real. Self-judging accepts broken tests; external judges accept
+tricks on text; the grader accepts broken images.}
+\label{fig:judges}
+\end{figure}
+
+Table~\ref{tab:judges} and Figure~\ref{fig:judges} show three distinct failure modes of LLM judges.
 
 \textbf{Self-judging is unreliable.} When the tested model judged its own tests, 37\% of accepted failures were broken.
 A model that fails a question is a poor authority on whether the question was changed. A larger model of the same family
@@ -422,24 +430,10 @@ Config & 1.7B & 8B & 32B & 1.7B & 8B & 32B & 1.7B & 8B & 32B \\
 
 \begin{figure}[t]
 \centering
-\begin{tikzpicture}
-\begin{axis}[
-  width=\linewidth, height=5.2cm, ybar, bar width=7pt, ymin=0, ymax=200,
-  symbolic x coords={a,b,c}, xtick=data, xticklabels={Qwen3-1.7B,Qwen3-8B,Qwen3-32B}, enlarge x limits=0.22,
-  ylabel={distinct questions (strict)}, ylabel style={font=\small}, tick label style={font=\small},
-  legend style={font=\scriptsize, at={(0.98,0.97)}, anchor=north east, legend columns=1, draw=none, fill=white, fill opacity=0.8, text opacity=1},
-  ymajorgrids, grid style={gray!20}, axis line style={gray!60},
-  error bars/y dir=both, error bars/y explicit, error bars/error bar style={black!70}]
-\addplot[fill=cHW, draw=none] coordinates {(a,98) +- (0,4) (b,49) +- (0,4) (c,33) +- (0,6)};
-\addplot[fill=cSJ, draw=none] coordinates {(a,108) +- (0,58) (b,40) +- (0,20) (c,26) +- (0,3)};
-\addplot[fill=cOJ, draw=none] coordinates {(a,55) +- (0,13) (b,60) +- (0,26) (c,28) +- (0,7)};
-\addplot[fill=cBO, draw=none] coordinates {(a,169) +- (0,29) (b,57) +- (0,29) (c,31) +- (0,12)};
-\addplot[fill=cBR, draw=none] coordinates {(a,100) +- (0,20) (b,59) +- (0,40) (c,39) +- (0,15)};
-\legend{Hand-written, Self-judged, Outside-judge, Bold, Bold+Rules}
-\end{axis}
-\end{tikzpicture}
-\caption{Text: distinct questions with a real failure after removing tricks (mean and std over 3 runs). Without trick
-removal, \BOLD{} reaches 135 (8B) and 80 (32B).}
+\includegraphics[width=\linewidth]{figures/fig_text_distinct.pdf}
+\caption{Text: distinct questions with a real failure (DeepSeek-graded; mean and std over 3 runs). The hatched part
+of \BOLD{} consists of tricks (double negations and fragmented questions); without them, \BOLD{} is back at the level
+of \HW{} on 8B and 32B. \BR{} produces no tricks.}
 \label{fig:text}
 \end{figure}
 
@@ -455,6 +449,15 @@ exactly: the fuzzer no longer produces the tricks, rather than producing them an
 59 and 39 distinct questions versus 99, 49 and 33 for \HW{}, and more real failures per 1{,}000 tests (64 vs.\ 54, 37
 vs.\ 26, 24 vs.\ 15). The run-to-run spread is large (8B: $\pm40$), so the advantage on text is modest rather than
 decisive. On 8B, \BR{} has a high false-alarm rate (42\% real); one of the three runs produced 413 of its 597 answer changes.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.72\linewidth]{figures/fig_tradeoff.pdf}
+\caption{Quantity versus quality on text (strict counts). Up and to the right is better. \BR{} (dark blue) is the
+only adaptive configuration that is never worse than \HW{} (grey) in quantity while staying competitive in precision on
+1.7B and 32B.}
+\label{fig:tradeoff}
+\end{figure}
 
 \paragraph{\OJ{} is clean but timid.} Hiding the answer and using an external judge yields the highest precision on
 1.7B (80\%) but finds only 55 distinct questions: without pressure towards stronger mutations, the model writes cautious
@@ -505,12 +508,63 @@ original; right: mutated). Only (a) is a fair test.}
 \label{fig:images}
 \end{figure}
 
-\paragraph{Images.} Table~\ref{tab:img} gives the image results. The hand-written image programs are mild and almost
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_image_distinct.pdf}
+\caption{Images: distinct questions with a failure. For \BR{}, the hatched bar is the DeepSeek-graded count and the
+solid bar the count corrected by the hand audit (rough, 4--8 audited cases per model).}
+\label{fig:imgbars}
+\end{figure}
+
+\paragraph{Images.} Table~\ref{tab:img} and Figure~\ref{fig:imgbars} give the image results. The hand-written image programs are mild and almost
 always valid (92--93\%) but find few failures, and fewer for stronger models. \BR{} learns substantially stronger image
 transformations. On VL-32B, most of its accepted failures are fair and it finds roughly twice as many distinct failing
 questions as \HW{} (about 37 vs.\ 16 after correction). On VL-8B it over-perturbs: DeepSeek accepts 101 distinct
 questions, but only one of eight audited failures is fair, so the corrected count (about 13) is below \HW{}. Without the
 audit, we would have reported a 3.5$\times$ gain on VL-8B that does not exist.
+
+\subsection{Does the loop improve over rounds?}
+\label{sec:rounds}
+
+A \emph{round} is one iteration of the loop: 48 tests, followed by feedback (scoring, new programs, tested repairs,
+retirement). A run ends when its 5{,}000 counted calls are used up, so the number of rounds differs between runs:
+70--74 for \HW{} text runs and 104--108 for \HW{} image runs, but 35--143 for \BR{}, because model-written programs
+that call the LLM inside \texttt{mutate} and the synthesis and repair prompts consume part of the budget. We plot
+against the actual round number, without rescaling, so that both the speed of improvement and the length of each run
+remain visible.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_over_rounds.pdf}
+\caption{Cumulative number of distinct questions with a real failure (DeepSeek-graded) against the round number. Each
+line is one run; the dot marks the end of the run. A steeper line means faster discovery.}
+\label{fig:rounds}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_rates_over_rounds.pdf}
+\caption{Real (solid) and broken (dashed) failures per 100 tests in blocks of 10 rounds, pooled over the runs still
+active in that block (late blocks of \BR{} therefore come from a single long run).}
+\label{fig:rates}
+\end{figure}
+
+Figure~\ref{fig:rounds} shows that \HW{} discovers failures at a nearly constant rate, as expected from a fixed set of
+programs. \BR{} starts at the same rate and then, in several runs, accelerates once the model has written stronger
+programs: the curves bend upwards after about 20 rounds (one Image 8B run) to 60--70 rounds (Text 8B, Image 32B). The final counts per
+run show the same picture with high variance: on Image 32B the three \BR{} runs reach 80, 43 and 26 distinct questions
+against 14--17 for \HW{}; on Text 8B the longest run reaches 105 against 46--53, but the two short runs (35 and 62
+rounds) end at 30 and 42. Their programs called the LLM inside \texttt{mutate} so often that these calls used 3{,}853
+and 2{,}921 of the 5{,}000 calls (889 in the long run), leaving few calls for testing.
+
+Figure~\ref{fig:rates} separates real from broken failures. On Image 2B and Image 32B, the real-failure rate of
+\BR{} rises over the run while the broken rate stays low: the loop learns. On Text 1.7B both rates stay roughly flat,
+with \BR{} above \HW{} in real failures and below it in broken ones; on Text 32B the broken rate peaks mid-run and then
+falls again as broken programs are repaired or retired. On Text 8B and Image 8B, the broken rate
+rises together with the real rate and eventually exceeds it, which matches the low precision in
+Tables~\ref{tab:text} and~\ref{tab:img}: the loop learns stronger mutations, but the judge does not stop it from
+overshooting. The two kinds of improvement, more real failures and more broken tests, are therefore not separable by
+the in-loop judge alone.
 
 \subsection{RQ4: What does self-testing change?}
 
