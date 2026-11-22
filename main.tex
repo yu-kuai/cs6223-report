@@ -82,7 +82,7 @@ increasingly used to \emph{generate} the follow-up tests. We study a fully close
 also writes, scores and repairs the mutation programs that test it, and ask how reliable such self-testing is. We
 evaluate Qwen3 1.7B, 8B and 32B on 1{,}140 MMLU questions and Qwen3-VL 2B, 8B and 32B on 2{,}017 ScienceQA image
 questions, with a fixed budget of 5{,}000 model calls per run and three runs per setting. Every reported failure is
-re-graded by an independent LLM (DeepSeek), and samples are audited by hand. We find that (i) the bottleneck is test
+re-graded by an independent LLM (DeepSeek), and samples are audited by an AI assistant acting as a human annotator. We find that (i) the bottleneck is test
 validity, not failure discovery: when the model judges its own tests, 37\% of the failures it accepts are broken
 tests; (ii) hiding the gold answer from the mutation programs is essential, raising the share of real failures from
 19\% to 80\%; (iii) an evolving fuzzer quickly learns to exploit its judge, inflating failure counts up to 2.8$\times$ with
@@ -126,7 +126,7 @@ Our contributions are:
 (1) a closed-loop, black-box fuzzer in which the tested model writes sandboxed mutation programs for both text
 multiple-choice questions and image questions, with bandit-based scheduling, tested repairs and retirement;
 (2) a controlled comparison of five configurations on six models under equal budgets, with independent re-grading and
-hand audits;
+sample audits;
 (3) evidence that an adaptive fuzzer \emph{games} LLM judges with answer-preserving but unnatural rewrites, and that
 simple non-editable code rules suppress this; and
 (4) evidence that LLM graders are overly lenient on degraded images, so image MT results require visual audits.
@@ -513,7 +513,7 @@ original; right: mutated). Only (a) is a fair test.}
 \centering
 \includegraphics[width=\linewidth]{figures/fig_image_distinct.pdf}
 \caption{Images: distinct questions with a failure. For \BR{}, the hatched bar is the DeepSeek-graded count and the
-solid bar the count corrected by the hand audit (rough, 4--8 audited cases per model).}
+solid bar the count corrected by the sample audit (rough, 4--8 audited cases per model).}
 \label{fig:imgbars}
 \end{figure}
 
