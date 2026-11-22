@@ -214,9 +214,10 @@ A mutated test passes three filters before the target is queried for it, and one
   \item \emph{fixed checks} that the fuzzer cannot edit: options are distinct and non-empty; no number in the question,
         options or hint disappears; no negation word is lost and no framing word (\emph{except}, \emph{false},
         \emph{least}, \dots) is added; the question does not newly mention an option's text;
-  \item \emph{rules} (\BR{} only), added after the audit in Section~\ref{sec:rq2}: the question gains no negation;
-        the original question is not broken up by inserted text (context may only be added before or after it); and no
-        option grows to more than twice its length plus 100 characters;
+  \item a \emph{minimal guard} (\BR{} only): a few more lines of the same fixed check, which reject a mutated
+        question that contains more negation words (\emph{not}, \emph{no}, \emph{never}, \dots) than the original, or
+        in which the original question has been split up by inserted text. It also rejects an option that has become
+        much longer than before. These lines were added after the audit in Section~\ref{sec:rq2};
   \item if the target's answer differs from $\pi(y)$, an LLM judge sees the original and mutated question (and both
         images) and returns a reason, a verdict VALID (the expected answer is still clearly the only correct one) or
         INVALID (the mutation changed the meaning or removed information), and for VALID cases a short description of
@@ -271,12 +272,12 @@ Name & Description \\
         untested repairs. Variant \emph{+ letter check} adds the deterministic gold-text guard. \\
 \OJ{} & As \SJ{}, but an external LLM (GLM) judges, the answer is hidden from programs, fixed checks are on and repairs are tested. \\
 \BOLD{} & \OJ{} plus pressure to find more failures: yield-based scoring, prompts for stronger variants of the best program, retirement of unproductive programs, at most 12 programs. \\
-\BR{} & \BOLD{} plus guardrails against judge gaming: three non-editable rules (no added negation, no fragmented question, no inflated options) and a 25\% cap per program lineage. \textbf{Final configuration.} \\
+\BR{} & \BOLD{} plus the minimal guard: the fixed check also rejects added negations, split-up questions and much longer options, and no program lineage gets more than 25\% of the tests. \textbf{Final configuration.} \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Table~\ref{tab:configs} summarises the five configurations. They were developed in this order, each in response to a
+Table~\ref{tab:configs} summarises the five configurations. The \HW{} baseline runs without the fixed check and the guard, because its programs are written by us and never change. Applying the guard afterwards to its failures removes at most 4\% of its distinct failing questions (Qwen3-8B, all three runs together: 99$\to$95; 1.7B: 181$\to$180; 32B and all image models: unchanged), so this does not affect the comparison. They were developed in this order, each in response to a
 problem observed with the previous one; Section~\ref{sec:results} reports them side by side.
 
 % ================================================================ 4
