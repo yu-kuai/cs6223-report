@@ -465,7 +465,7 @@ Config & 1.7B & 8B & 32B & 1.7B & 8B & 32B & 1.7B & 8B & 32B \\
 
 
 
-Table~\ref{tab:text} gives the text results (charts: Figures~\ref{fig:text} and~\ref{fig:tradeoff} in the appendix).
+Table~\ref{tab:text} gives the text results.
 
 \textbf{\BOLD{} looks strong only because of tricks.} \BOLD{} finds 1.7--2.8$\times$ more distinct failing questions
 than \HW{} under DeepSeek grading. For 8B and 32B, almost all of the gain disappears under the strict count
@@ -530,7 +530,7 @@ original, right: mutated). Only (a) is a fair test.}
 
 
 
-\textbf{Images.} Table~\ref{tab:img} gives the image results (chart: Figure~\ref{fig:imgbars} in the appendix). The hand-written image
+\textbf{Images.} Table~\ref{tab:img} gives the image results. The hand-written image
 programs are mild and almost always valid (92--93\%) but find few failures, and fewer for stronger models. \BR{}
 learns substantially stronger image transformations (Figure~\ref{fig:images}). On VL-32B, most of its accepted
 failures are fair and it finds roughly twice as many distinct failing questions as \HW{} (about 37 vs.\ 16 after
@@ -645,6 +645,8 @@ correctness of every claim in this report.
 \bibliography{ref}
 
 % ================================================================ appendix
+\clearpage
+\nobalance
 \appendix
 
 \section{Full Results}
@@ -705,7 +707,7 @@ The full results are in Table~\ref{tab:full}.
 \section{Additional Figures}
 \label{app:figs}
 
-These figures show the data of the tables in Section~\ref{sec:results} as charts.
+Figure~\ref{fig:judges} shows Table~\ref{tab:judges} as a chart.
 
 \begin{figure}[t]
 \centering
@@ -715,31 +717,11 @@ tricks on text; the grader accepts broken images.}
 \label{fig:judges}
 \end{figure}
 
-\begin{figure*}[t]
-\centering
-\includegraphics[width=0.85\linewidth]{figures/fig_text_distinct.pdf}
-\caption{Text: distinct questions with a real failure (DeepSeek-graded; mean and std over 3 runs). The hatched part
-of \BOLD{} consists of tricks (double negations and fragmented questions); without them, \BOLD{} is back at the level
-of \HW{} on 8B and 32B. \BR{} produces no tricks.}
-\label{fig:text}
-\end{figure*}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.9\linewidth]{figures/fig_tradeoff.pdf}
-\caption{Quantity versus quality on text (strict counts). Up and to the right is better. \BR{} (dark blue) is the
-only adaptive configuration that is never worse than \HW{} (grey) in quantity while staying competitive in precision on
-1.7B and 32B.}
-\label{fig:tradeoff}
-\end{figure}
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=\linewidth]{figures/fig_image_distinct.pdf}
-\caption{Images: distinct questions with a failure. For \BR{}, the hatched bar is the DeepSeek-graded count and the
-solid bar the count corrected by the sample audit (rough, 4--8 audited cases per model).}
-\label{fig:imgbars}
-\end{figure}
+
+
+
 
 \begin{figure*}[t]
 \centering
@@ -775,9 +757,8 @@ longer clearly correct. [\dots] Respond with a JSON object: reason, verdict, pat
 \section{Audit Details}
 \label{app:audit}
 
-\begin{table}[h]
-\centering
-\caption{Audit counts behind Table~\ref{tab:judges} (fair / trick / broken).}
+\begin{center}
+\captionof{table}{Audit counts behind Table~\ref{tab:judges} (fair / trick / broken).}
 \label{tab:auditcounts}
 \small
 \setlength{\tabcolsep}{3pt}
@@ -798,7 +779,7 @@ Sample & Judge & VALID & INVALID \\
  & DeepSeek: \BR{} VL-32B (8) & 6 / 0 / 2 & -- \\
 \bottomrule
 \end{tabular}
-\end{table}
+\end{center}
 
 DeepSeek is stricter than GLM on text: 8 of its 15 INVALID verdicts in the \BOLD{} sample concern irrelevant but false
 prefixes (e.g.\ an invented ``fact'' before the question) that do not change the answer. These count against
