@@ -95,7 +95,7 @@ re-graded by an independent LLM (DeepSeek), and samples are audited by an AI ass
 We find that (i) the bottleneck is test validity, not failure discovery: when the model judges its own tests, 37\% of
 the failures it accepts are broken tests; (ii) hiding the gold answer from the mutation programs is essential, raising
 the share of real failures from 19\% to 80\%; (iii) an evolving fuzzer quickly learns to exploit its judge, inflating
-failure counts up to 2.8$\times$ with double negations and fragmented questions that two different LLM judges accept;
+failure counts by up to 2.6$\times$ with double negations and fragmented questions that two different LLM judges accept;
 and (iv) cheap, non-editable code checks remove these exploits. Our final configuration finds 1--20\% more distinct
 failing questions than hand-written mutations on text and about twice as many on the strongest vision model, but
 over-perturbs images for smaller models, where the LLM grader is too lenient to notice.
@@ -130,7 +130,7 @@ independent grader, and answer the four research questions of our proposal (Sect
 \textbf{Contributions.}
 (1) A closed-loop, black-box fuzzer in which the tested model writes sandboxed mutation programs for both text
 multiple-choice questions and image questions, with bandit-based scheduling, tested repairs and retirement.
-(2) A controlled comparison of five configurations on six models under equal budgets, with independent re-grading and
+(2) A controlled comparison of five configurations on three text models, and three of them on three vision models, under equal budgets, with independent re-grading and
 sample audits.
 (3) Evidence that an adaptive fuzzer \emph{games} LLM judges with answer-preserving but unnatural rewrites, and that
 simple non-editable code rules suppress this.
@@ -158,8 +158,8 @@ simple non-editable code rules suppress this.
 \draw[arr] (fb.west) -| node[lab, pos=0.25, below]{steer} (pool.south);
 \end{tikzpicture}
 \caption{The closed loop. One round runs 48 tests, then applies feedback. The model under test writes the mutation
-programs and answers the questions; in \SJ{} it also judges them, and in the other configurations an external LLM
-judges.}
+programs and answers the questions; in \HW{} and \SJ{} it also judges them, and in \OJ{}, \BOLD{} and \BR{} an
+external LLM judges.}
 \label{fig:loop}
 \end{figure*}
 
@@ -195,7 +195,7 @@ correct option, for example by weakening its text.
 
 \subsection{Validity Checks and Judges}
 
-A mutated test passes three filters before the target is queried for it, and one after:
+In \BR{}, a mutated test passes three filters before the target is queried for it, and one after:
 \begin{enumerate}[leftmargin=*]
   \item the program's own \texttt{check} (editable by the fuzzer);
   \item \emph{fixed checks} that the fuzzer cannot edit: options are distinct and non-empty; no number in the question,
@@ -210,8 +210,8 @@ A mutated test passes three filters before the target is queried for it, and one
         INVALID (the mutation changed the meaning or removed information), and for VALID cases a short description of
         the failure pattern.
 \end{enumerate}
-In \SJ{} the judge is the model under test itself; in all later configurations it is GLM-5.3-Flash accessed through an
-API, which was verified to use the image (40/40 correct with the image versus 31/40 without on a ScienceQA sample).
+In \SJ{} the judge is the model under test itself (\HW{} also uses the tested model as judge, but its verdicts change
+nothing because it has no feedback); in \OJ{}, \BOLD{} and \BR{} it is GLM-5.3-Flash accessed through an API, which was verified to use the image (40/40 correct with the image versus 31/40 without on a ScienceQA sample).
 
 \subsection{Feedback}
 
@@ -226,7 +226,7 @@ s_p=\underbrace{\frac{V_p+\tfrac12 N_p+\tfrac12}{n_p+2}}_{\text{yield}}
 \]
 (\BOLD{} and \BR{}; \SJ{} and \OJ{} weight novelty more, $(V_p+2N_p+1)/(n_p+2)$, with a bonus of $0.3$). Failure
 clusters are formed online by leader clustering of the judge's pattern descriptions with MiniLM embeddings and a cosine
-threshold of 0.8. Seeds are sampled uniformly over MMLU subjects.
+threshold of 0.8. Seeds are sampled uniformly over MMLU subjects (text) and uniformly over questions (images).
 
 \textbf{New programs.} Every second round the model writes two new programs. Its prompt contains the API, an example
 program from the least-explored family, the list of known failure clusters and one recent VALID failure. In \BOLD{}
@@ -338,7 +338,7 @@ questions~\cite{hendrycks2021mmlu} (20 per subject, 57 subjects). Images: Qwen3-
 answers greedily. Baseline accuracies are 0.577, 0.819 and 0.874 (text) and 0.858, 0.931 and 0.965 (images).
 
 \textbf{Budget and repetitions.} A run stops after 5{,}000 counted calls: program synthesis and repair, LLM calls made
-inside \texttt{mutate}, and target answers. Judge calls are counted when the judge is the local model (\SJ{}) and not
+inside \texttt{mutate}, and target answers. Judge calls are counted when the judge is the local model (\HW{} and \SJ{}) and not
 counted for the API judge. Each configuration is run with three random seeds; we report mean $\pm$ standard deviation.
 
 \textbf{Grading and audits.} The in-loop verdict is part of the method and cannot be trusted as its evaluation.
@@ -423,7 +423,7 @@ Table~\ref{tab:judges} (chart: Figure~\ref{fig:judges} in the appendix) shows th
 
 \textbf{Self-judging is unreliable.} When the tested model judged its own tests, 37\% of accepted failures were broken.
 A model that fails a question is a poor authority on whether the question was changed. A larger model of the same family
-(Qwen3-32B) halves this rate but still accepts 22\% broken tests. The independent judges (GLM and DeepSeek) accepted no
+(Qwen3-32B) reduces this rate but still accepts 22\% broken tests. The independent judges (GLM and DeepSeek) accepted no
 clearly broken text mutation in our samples.
 
 \textbf{External judges accept tricks.} Once the fuzzer in \BOLD{} was rewarded for yield, it discovered rewrites that
@@ -481,7 +481,7 @@ changes.
 
 
 
-\textbf{\OJ{} is clean but timid.} Hiding the answer and using an external judge yields the highest precision on
+\textbf{\OJ{} is clean but timid.} Hiding the answer and using an external judge yields a high precision on
 1.7B (80\%) but finds only 55 distinct questions: without pressure towards stronger mutations, the model writes cautious
 programs. This motivated the yield-based scoring of \BOLD{}.
 
